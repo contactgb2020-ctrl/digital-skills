@@ -41,7 +41,6 @@ export default function Header() {
             </div>
             <span className="font-heading font-bold text-lg text-secondary-600 dark:text-white hidden sm:block">
               Digital Skills <span className="text-primary-500">Africa</span>
-              <span className="block text-[10px] font-normal text-secondary-400 dark:text-neutral-100">by LIYAH GROUP</span>
             </span>
           </button>
 

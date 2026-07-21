@@ -217,7 +217,7 @@ export default function SignupPage() {
     navigate('/dashboard');
   };
 
-  const steps = [1, 2, 3, 4, 5];
+  const steps = [1, 2, 3, 4, 5, 6];
 
   return (
     <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-light to-primary-50 dark:from-secondary-700 dark:to-secondary-800 px-4 py-12">
@@ -236,7 +236,7 @@ export default function SignupPage() {
                 >
                   {step > s ? <CheckCircle className="w-5 h-5" /> : s}
                 </div>
-                {s < 4 && (
+                {s < 6 && (
                   <div className={`flex-1 h-1 mx-2 rounded ${step > s ? 'bg-primary-500' : 'bg-gray-200 dark:bg-secondary-500'}`} />
                 )}
               </div>
@@ -451,12 +451,64 @@ export default function SignupPage() {
               )}
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setStep(1)} className="btn-outline flex items-center gap-2">
+                <button type="button" onClick={() => setStep(2)} className="btn-outline flex items-center gap-2">
                   <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
                 </button>
                 <button type="button" onClick={handleLocationNext} className="btn-primary flex-1 flex items-center justify-center gap-2">
                   {t('onboarding.next')}
                   <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: KYC verification */}
+          {step === 4 && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldCheck className="w-5 h-5 text-primary-500" />
+                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('kyc.title')}</h2>
+              </div>
+              <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">{t('kyc.subtitle')}</p>
+
+              <div>
+                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.document_type')}</label>
+                <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} className="input-field">
+                  <option value="national_id">{t('kyc.national_id')}</option>
+                  <option value="passport">{t('kyc.passport')}</option>
+                  <option value="driver_license">{t('kyc.driver_license')}</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.upload')} (URL)</label>
+                <div className="relative">
+                  <Upload className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
+                  <input type="url" value={documentUrl} onChange={(e) => setDocumentUrl(e.target.value)} className="input-field pl-10" placeholder="https://..." />
+                </div>
+              </div>
+
+              {selectedRole === 'trainer' && (
+                <>
+                  <div className="p-3 rounded-lg bg-primary-50 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 text-sm">
+                    {t('kyc.trainer_extra')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.diploma')} (URL)</label>
+                    <div className="relative">
+                      <FileCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
+                      <input type="url" value={diplomaUrl} onChange={(e) => setDiplomaUrl(e.target.value)} className="input-field pl-10" placeholder="https://..." />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setStep(3)} className="btn-outline flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
+                </button>
+                <button type="button" onClick={() => setStep(5)} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  {t('onboarding.next')} <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
