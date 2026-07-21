@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, User, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, MapPin, Plus } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, MapPin, Plus, GraduationCap, BookOpen, Upload, FileCheck, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +42,10 @@ export default function SignupPage() {
   const [customValue, setCustomValue] = useState('');
 
   const [selectedPlan, setSelectedPlan] = useState('starter');
+  const [selectedRole, setSelectedRole] = useState<'student' | 'trainer'>('student');
+  const [documentType, setDocumentType] = useState('national_id');
+  const [documentUrl, setDocumentUrl] = useState('');
+  const [diplomaUrl, setDiplomaUrl] = useState('');
 
   // Load countries on mount
   useEffect(() => {
@@ -127,6 +131,11 @@ export default function SignupPage() {
     setStep(2);
   };
 
+  const handleRoleNext = () => {
+    setError(null);
+    setStep(3);
+  };
+
   const handleLocationNext = () => {
     setError(null);
 
@@ -140,7 +149,7 @@ export default function SignupPage() {
       setPendingSuggestion({ level: customMode, parentId, name: customValue.trim() });
     }
 
-    setStep(3);
+    setStep(4);
   };
 
   const handleFinish = async () => {
@@ -162,11 +171,25 @@ export default function SignupPage() {
     if (user) {
       await supabase.from('profiles').update({
         nom: nom.trim(),
+        role: selectedRole,
         country_id: selectedCountry || null,
         region_id: selectedRegion || null,
         city_id: selectedCity || null,
         district_id: selectedDistrict || null,
+        kyc_status: documentUrl ? 'pending' : 'unverified',
+        document_type: documentType || null,
+        document_url: documentUrl || null,
       }).eq('id', user.id);
+
+      // Insert KYC document if uploaded
+      if (documentUrl) {
+        await supabase.from('kyc_documents').insert({
+          user_id: user.id,
+          document_type: documentType,
+          file_url: documentUrl,
+          status: 'pending',
+        });
+      }
 
       // Submit pending location suggestion
       if (pendingSuggestion) {
@@ -194,7 +217,7 @@ export default function SignupPage() {
     navigate('/dashboard');
   };
 
-  const steps = [1, 2, 3, 4];
+  const steps = [1, 2, 3, 4, 5];
 
   return (
     <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-light to-primary-50 dark:from-secondary-700 dark:to-secondary-800 px-4 py-12">
@@ -278,8 +301,62 @@ export default function SignupPage() {
             </form>
           )}
 
-          {/* Step 2: Location cascade */}
+          {/* Step 2: Role choice */}
           {step === 2 && (
+            <div className="space-y-4 animate-fade-in">
+              <h2 className="text-xl font-bold text-secondary-600 dark:text-white mb-4">{t('signup.role_choice')}</h2>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('student')}
+                  className={`w-full p-5 rounded-xl border-2 text-left transition-all ${selectedRole === 'student' ? 'border-primary-500 bg-primary-50 dark:bg-primary-600/20' : 'border-gray-200 dark:border-secondary-500 hover:border-primary-300'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedRole === 'student' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400'}`}>
+                      <GraduationCap className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-secondary-600 dark:text-white">{t('signup.role_learner')}</div>
+                      <div className="text-sm text-secondary-400 dark:text-neutral-100">{t('signup.role_learner_desc')}</div>
+                    </div>
+                    {selectedRole === 'student' && <CheckCircle className="w-6 h-6 text-primary-500 ml-auto" />}
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('trainer')}
+                  className={`w-full p-5 rounded-xl border-2 text-left transition-all ${selectedRole === 'trainer' ? 'border-primary-500 bg-primary-50 dark:bg-primary-600/20' : 'border-gray-200 dark:border-secondary-500 hover:border-primary-300'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedRole === 'trainer' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400'}`}>
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-secondary-600 dark:text-white">{t('signup.role_trainer')}</div>
+                      <div className="text-sm text-secondary-400 dark:text-neutral-100">{t('signup.role_trainer_desc')}</div>
+                    </div>
+                    {selectedRole === 'trainer' && <CheckCircle className="w-6 h-6 text-primary-500 ml-auto" />}
+                  </div>
+                </button>
+              </div>
+              {selectedRole === 'trainer' && (
+                <div className="p-3 rounded-lg bg-primary-50 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 text-sm">
+                  {t('trainer.free_dashboard')}
+                </div>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setStep(1)} className="btn-outline flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
+                </button>
+                <button type="button" onClick={handleRoleNext} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  {t('onboarding.next')} <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Location cascade */}
+          {step === 3 && (
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-5 h-5 text-primary-500" />
@@ -385,8 +462,8 @@ export default function SignupPage() {
             </div>
           )}
 
-          {/* Step 3: Plan */}
-          {step === 3 && (
+          {/* Step 5: Plan */}
+          {step === 5 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-xl font-bold text-secondary-600 dark:text-white mb-4">{t('onboarding.step3')}</h2>
               <div className="space-y-3">
@@ -412,18 +489,18 @@ export default function SignupPage() {
                 ))}
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setStep(2)} className="btn-outline flex items-center gap-2">
+                <button type="button" onClick={() => setStep(4)} className="btn-outline flex items-center gap-2">
                   <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
                 </button>
-                <button type="button" onClick={() => setStep(4)} className="btn-primary flex-1">
+                <button type="button" onClick={() => setStep(6)} className="btn-primary flex-1">
                   {t('onboarding.next')}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 4: Trial confirmation */}
-          {step === 4 && (
+          {/* Step 6: Trial confirmation */}
+          {step === 6 && (
             <div className="space-y-6 animate-fade-in text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-success-100 dark:bg-success-600/20 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-success-500" />
@@ -432,7 +509,7 @@ export default function SignupPage() {
               <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('pricing.subtitle')}</p>
 
               <div className="flex gap-3">
-                <button type="button" onClick={() => setStep(3)} className="btn-outline flex items-center gap-2">
+                <button type="button" onClick={() => setStep(5)} className="btn-outline flex items-center gap-2">
                   <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
                 </button>
                 <button type="button" onClick={handleFinish} disabled={loading} className="btn-primary flex-1 disabled:opacity-60">

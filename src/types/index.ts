@@ -3,7 +3,8 @@ export type UserRole = 'student' | 'trainer' | 'super_admin';
 export type SubscriptionPlan = 'starter' | 'premium' | 'enterprise';
 export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'cancelled';
 
-export type CourseStatus = 'pending_review' | 'published' | 'rejected';
+export type CourseStatus = 'draft' | 'pending_review' | 'published' | 'rejected';
+export type KycStatus = 'unverified' | 'pending' | 'approved' | 'rejected';
 export type CourseLevel = 'Débutant' | 'Intermédiaire' | 'Avancé';
 
 export type SuggestionStatus = 'pending' | 'approved' | 'rejected';
@@ -23,6 +24,9 @@ export interface Profile {
   language: string;
   theme: string;
   tenant_id: string | null;
+  kyc_status: KycStatus;
+  document_type: string | null;
+  document_url: string | null;
   created_at: string;
 }
 
@@ -87,6 +91,7 @@ export interface Course {
   description: string;
   image: string;
   category: string;
+  category_id: string | null;
   level: CourseLevel;
   created_by: string;
   tenant_id: string | null;
@@ -182,4 +187,71 @@ export interface CourseWithDetails extends Course {
   avg_rating?: number;
   review_count?: number;
   enrollment_count?: number;
+}
+
+export interface KycDocument {
+  id: string;
+  user_id: string;
+  document_type: string;
+  file_url: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewed_by: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface WatchSession {
+  id: string;
+  user_id: string;
+  lesson_id: string;
+  course_id: string;
+  tenant_id: string | null;
+  watched_seconds: number;
+  created_at: string;
+}
+
+export interface TrainerEarning {
+  id: string;
+  trainer_id: string;
+  period_start: string;
+  period_end: string;
+  total_watch_hours: number;
+  amount_due: number;
+  status: 'pending' | 'paid';
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface CustomRole {
+  id: string;
+  name: string;
+  tenant_id: string | null;
+  created_by: string;
+  created_at: string;
+}
+
+export interface RolePermission {
+  id: string;
+  role_id: string;
+  permission_key: string;
+  allowed: boolean;
+  created_at: string;
+}
+
+export interface StaffMember {
+  id: string;
+  user_id: string;
+  custom_role_id: string;
+  assigned_by: string;
+  created_at: string;
 }

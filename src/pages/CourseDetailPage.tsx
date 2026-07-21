@@ -410,6 +410,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
           quizResult={quizResult}
           setQuizResult={setQuizResult}
           t={t}
+          userId={session?.user.id}
         />
       )}
     </div>
@@ -418,7 +419,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
 
 function LessonPlayer({
   lesson, quizzes, isCompleted, onClose, onComplete, onNext, onPrev, hasNext, hasPrev,
-  showQuiz, setShowQuiz, quizAnswers, setQuizAnswers, onQuizSubmit, quizResult, setQuizResult, t
+  showQuiz, setShowQuiz, quizAnswers, setQuizAnswers, onQuizSubmit, quizResult, setQuizResult, t, userId
 }: {
   lesson: Lesson;
   quizzes: Quiz[];
@@ -437,6 +438,7 @@ function LessonPlayer({
   quizResult: { score: number; passed: boolean } | null;
   setQuizResult: (v: { score: number; passed: boolean } | null) => void;
   t: (k: TKey) => string;
+  userId?: string;
 }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
@@ -450,7 +452,24 @@ function LessonPlayer({
           {/* Video */}
           {lesson.video_url && (
             <div className="mb-4 rounded-xl overflow-hidden bg-black aspect-video">
-              <video src={lesson.video_url} controls className="w-full h-full" />
+              <video
+                src={lesson.video_url}
+                controls
+                className="w-full h-full"
+                onTimeUpdate={(e) => {
+                  const video = e.currentTarget;
+                  const seconds = Math.floor(video.currentTime);
+                  // Track every 30 seconds of viewing
+                  if (seconds > 0 && seconds % 30 === 0 && video.paused === false) {
+                    supabase.from('watch_sessions').insert({
+                      user_id: userId,
+                      lesson_id: lesson.id,
+                      course_id: lesson.course_id,
+                      watched_seconds: 30,
+                    }).then(() => {});
+                  }
+                }}
+              />
             </div>
           )}
 

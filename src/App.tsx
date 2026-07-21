@@ -13,6 +13,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import TrainerDashboard from './pages/TrainerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CourseDetailPage from './pages/CourseDetailPage';
+import { AboutPage, ContactPage, TermsPage, PrivacyPage, FaqPage } from './pages/FooterPages';
 import type { Session } from '@supabase/supabase-js';
 
 function AppRoutes() {
@@ -39,7 +40,6 @@ function AppRoutes() {
 }
 
 function renderPage(path: string, session: Session | null) {
-  // Course detail: /course/<id>
   if (path.startsWith('/course/')) {
     const courseId = path.replace('/course/', '');
     return <CourseDetailPage courseId={courseId} />;
@@ -52,6 +52,16 @@ function renderPage(path: string, session: Session | null) {
       return <CoursesPage />;
     case '/pricing':
       return <PricingPage />;
+    case '/about':
+      return <AboutPage />;
+    case '/contact':
+      return <ContactPage />;
+    case '/terms':
+      return <TermsPage />;
+    case '/privacy':
+      return <PrivacyPage />;
+    case '/faq':
+      return <FaqPage />;
     case '/login':
       return session ? <StudentDashboard /> : <LoginPage />;
     case '/signup':

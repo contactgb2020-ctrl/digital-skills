@@ -4,17 +4,8 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import type { Course, Subscription, Review } from '../types';
+import type { Course, Subscription, Review, Category } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
-
-const CATEGORIES = [
-  'Développement web & mobile',
-  'Marketing digital',
-  'Data & IA',
-  'Design graphique',
-  'Bureautique & productivité',
-  'Beauté & Style',
-];
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
 
@@ -29,9 +20,13 @@ export default function CoursesPage() {
   const [activeLevel, setActiveLevel] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [courseRatings, setCourseRatings] = useState<Record<string, { avg: number; count: number }>>({});
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     (async () => {
+      const { data: catData } = await supabase.from('categories').select('*').order('name', { ascending: true });
+      if (catData) setCategories(catData as Category[]);
+
       const { data } = await supabase.from('courses').select('*').eq('status', 'published').order('created_at', { ascending: false });
       if (data) {
         setCourses(data as Course[]);
@@ -80,9 +75,9 @@ export default function CoursesPage() {
           <button onClick={() => setActiveCategory(null)} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${!activeCategory ? 'bg-primary-500 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100'}`}>
             Toutes
           </button>
-          {CATEGORIES.map((cat) => (
-            <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat ? 'bg-primary-500 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100'}`}>
-              {cat}
+          {categories.map((cat) => (
+            <button key={cat.id} onClick={() => setActiveCategory(cat.name)} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat.name ? 'bg-primary-500 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100'}`}>
+              {cat.name}
             </button>
           ))}
         </div>

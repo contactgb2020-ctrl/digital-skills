@@ -1,20 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText, Wallet, DollarSign } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Course, Lesson, Quiz, Enrollment, Review } from '../types';
+import type { Course, Lesson, Quiz, Enrollment, Review, Category, TrainerEarning } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
-const CATEGORIES = [
-  'Développement web & mobile',
-  'Marketing digital',
-  'Data & IA',
-  'Design graphique',
-  'Bureautique & productivité',
-  'Beauté & Style',
-];
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
 
 export default function TrainerDashboard() {
@@ -39,8 +31,10 @@ export default function TrainerDashboard() {
 }
 
 function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnType<typeof useAuth>['profile']>; session: ReturnType<typeof useAuth>['session']; t: (k: TKey) => string }) {
-  const [tab, setTab] = useState<'courses' | 'create' | 'stats'>('courses');
+  const [tab, setTab] = useState<'courses' | 'create' | 'stats' | 'earnings'>('courses');
   const [courses, setCourses] = useState<Course[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [earnings, setEarnings] = useState<TrainerEarning[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -50,7 +44,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const [courseReviews, setCourseReviews] = useState<Record<string, Review[]>>({});
 
   const [formData, setFormData] = useState({
-    title: '', description: '', category: CATEGORIES[0], level: 'Débutant', image: '',
+    title: '', description: '', category: '', category_id: '', level: 'Débutant', image: '',
   });
 
   const [lessonForm, setLessonForm] = useState({ courseId: '', title: '', video_url: '', document_url: '', duration: 0, order_number: 0 });
@@ -61,6 +55,17 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
   const loadCourses = useCallback(async () => {
     if (!session?.user) return;
+    const { data: catData } = await supabase.from('categories').select('*').order('name', { ascending: true });
+    if (catData) {
+      setCategories(catData as Category[]);
+      if (catData.length > 0 && !formData.category) {
+        setFormData((prev) => ({ ...prev, category: (catData[0] as Category).name, category_id: (catData[0] as Category).id }));
+      }
+    }
+
+    const { data: earnData } = await supabase.from('trainer_earnings').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
+    if (earnData) setEarnings(earnData as TrainerEarning[]);
+
     const { data } = await supabase.from('courses').select('*').eq('created_by', session.user.id).order('created_at', { ascending: false });
     if (data) {
       setCourses(data as Course[]);
@@ -87,7 +92,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
     if (editingCourse) {
       const { data } = await supabase.from('courses').update({
         title: formData.title, description: formData.description,
-        category: formData.category, level: formData.level, image: formData.image,
+        category: formData.category, category_id: formData.category_id, level: formData.level, image: formData.image,
       }).eq('id', editingCourse.id).select().single();
       if (data) {
         setCourses(courses.map((c) => (c.id === editingCourse.id ? data as Course : c)));
@@ -96,6 +101,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
     } else {
       const { data } = await supabase.from('courses').insert({
         title: formData.title, description: formData.description, category: formData.category,
+        category_id: formData.category_id || null,
         level: formData.level, image: formData.image, created_by: session.user.id, status: 'pending_review',
       }).select().single();
       if (data) {
@@ -103,14 +109,14 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
         setCourseLessons({ ...courseLessons, [(data as Course).id]: [] });
       }
     }
-    setFormData({ title: '', description: '', category: CATEGORIES[0], level: 'Débutant', image: '' });
+    setFormData({ title: '', description: '', category: categories.length > 0 ? categories[0].name : '', category_id: categories.length > 0 ? categories[0].id : '', level: 'Débutant', image: '' });
     setShowForm(false);
     setTab('courses');
   }, [session, editingCourse, formData, courses, courseLessons]);
 
   const handleEdit = useCallback((course: Course) => {
     setEditingCourse(course);
-    setFormData({ title: course.title, description: course.description, category: course.category, level: course.level, image: course.image });
+    setFormData({ title: course.title, description: course.description, category: course.category, category_id: course.category_id || '', level: course.level, image: course.image });
     setShowForm(true);
     setTab('create');
   }, []);
@@ -167,6 +173,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const sidebarItems = [
     { icon: <BookOpen className="w-5 h-5" />, labelKey: 'trainer.my_courses' as TKey, active: tab === 'courses', onClick: () => setTab('courses') },
     { icon: <Plus className="w-5 h-5" />, labelKey: 'trainer.create_course' as TKey, active: tab === 'create', onClick: () => { setTab('create'); if (!editingCourse) setShowForm(true); } },
+    { icon: <Wallet className="w-5 h-5" />, labelKey: 'trainer.earnings' as TKey, active: tab === 'earnings', onClick: () => setTab('earnings') },
     { icon: <BarChart3 className="w-5 h-5" />, labelKey: 'trainer.stats' as TKey, active: tab === 'stats', onClick: () => setTab('stats') },
   ];
 
@@ -176,6 +183,10 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
   return (
     <DashboardLayout title={`${t('dashboard.welcome')}, ${profile.nom}`} items={sidebarItems} currentRoute="/trainer" userRole={profile.role}>
+      <div className="mb-4 p-3 rounded-xl bg-success-50 dark:bg-success-600/20 border border-success-200 dark:border-success-600 flex items-center gap-2">
+        <CheckCircle className="w-5 h-5 text-success-500" />
+        <span className="text-sm text-success-600 dark:text-success-400">{t('trainer.free_dashboard')}</span>
+      </div>
       {loading ? (
         <div className="text-center py-12 text-secondary-400 dark:text-neutral-100">{t('common.loading')}</div>
       ) : (
@@ -305,8 +316,12 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.category')}</label>
-                  <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field">
-                    {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                  <select value={formData.category_id} onChange={(e) => {
+                    const cat = categories.find((c) => c.id === e.target.value);
+                    setFormData({ ...formData, category_id: e.target.value, category: cat?.name || '' });
+                  }} className="input-field">
+                    <option value="">{t('trainer.category_required')}</option>
+                    {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                   </select>
                 </div>
                 <div>
@@ -391,6 +406,46 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
             </div>
           )}
 
+          {/* Earnings */}
+          {tab === 'earnings' && (
+            <div className="space-y-6">
+              <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-600/20 border border-primary-200 dark:border-primary-600 flex items-center gap-3">
+                <DollarSign className="w-6 h-6 text-primary-500" />
+                <span className="text-sm text-secondary-600 dark:text-neutral-100">{t('trainer.commission_rate')}</span>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-6">
+                <StatCard icon={<Clock className="w-6 h-6" />} label={t('trainer.watch_hours')} value={earnings.reduce((s, e) => s + Number(e.total_watch_hours), 0)} />
+                <StatCard icon={<Wallet className="w-6 h-6" />} label={t('trainer.amount_due')} value={earnings.filter((e) => e.status === 'pending').reduce((s, e) => s + Number(e.amount_due), 0)} prefix="$" />
+                <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.amount_paid')} value={earnings.filter((e) => e.status === 'paid').reduce((s, e) => s + Number(e.amount_due), 0)} prefix="$" />
+              </div>
+
+              <div className="card p-6">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.earnings_history')}</h3>
+                {earnings.length === 0 ? (
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('trainer.no_earnings')}</p>
+                ) : (
+                  <div className="space-y-2">
+                    {earnings.map((e) => (
+                      <div key={e.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
+                        <div className="text-sm">
+                          <span className="text-secondary-600 dark:text-white">{e.period_start} → {e.period_end}</span>
+                          <span className="text-xs text-secondary-400 dark:text-neutral-100 ml-2">{e.total_watch_hours}h</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold text-primary-500">${Number(e.amount_due).toFixed(2)}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${e.status === 'paid' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400'}`}>
+                            {e.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Stats */}
           {tab === 'stats' && (
             <div className="space-y-6">
@@ -448,11 +503,11 @@ function StatusBadge({ status, t }: { status: string; t: (k: TKey) => string }) 
   );
 }
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function StatCard({ icon, label, value, prefix }: { icon: React.ReactNode; label: string; value: number; prefix?: string }) {
   return (
     <div className="card p-6">
       <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">{icon}</div>
-      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{value.toLocaleString()}</div>
+      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{prefix}{value.toLocaleString()}</div>
       <div className="text-sm text-secondary-400 dark:text-neutral-100">{label}</div>
     </div>
   );

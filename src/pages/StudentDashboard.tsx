@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Award, User, Lock, Play, CheckCircle, TrendingUp, Clock, Star, BarChart3 } from 'lucide-react';
+import { BookOpen, Award, User, Lock, Play, CheckCircle, TrendingUp, Clock, Star, BarChart3, ShieldCheck, FileCheck } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Course, Progress, Subscription, Enrollment, Certificate } from '../types';
+import type { Course, Progress, Subscription, Enrollment, Certificate, QuizAttempt } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 export default function StudentDashboard() {
   const { t } = useLanguage();
   const { navigate } = useRouter();
   const { profile, session } = useAuth();
-  const [tab, setTab] = useState<'my' | 'catalog' | 'progress' | 'certificates' | 'profile'>('my');
+  const [tab, setTab] = useState<'my' | 'catalog' | 'progress' | 'analytics' | 'certificates' | 'profile'>('my');
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
+  const [watchSessions, setWatchSessions] = useState<{ course_id: string; watched_seconds: number }[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,6 +45,12 @@ export default function StudentDashboard() {
       const { data: certData } = await supabase.from('certificates').select('*').eq('user_id', session.user.id);
       if (certData) setCertificates(certData as Certificate[]);
 
+      const { data: quizData } = await supabase.from('quiz_attempts').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+      if (quizData) setQuizAttempts(quizData as QuizAttempt[]);
+
+      const { data: watchData } = await supabase.from('watch_sessions').select('course_id, watched_seconds').eq('user_id', session.user.id);
+      if (watchData) setWatchSessions(watchData as { course_id: string; watched_seconds: number }[]);
+
       const { data: subData } = await supabase.from('subscriptions').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (subData) setSubscription(subData as Subscription);
 
@@ -59,6 +67,7 @@ export default function StudentDashboard() {
     { icon: <BookOpen className="w-5 h-5" />, labelKey: 'dashboard.my_courses' as TKey, active: tab === 'my', onClick: () => setTab('my') },
     { icon: <BarChart3 className="w-5 h-5" />, labelKey: 'dashboard.catalog' as TKey, active: tab === 'catalog', onClick: () => setTab('catalog') },
     { icon: <TrendingUp className="w-5 h-5" />, labelKey: 'dashboard.progress' as TKey, active: tab === 'progress', onClick: () => setTab('progress') },
+    { icon: <BarChart3 className="w-5 h-5" />, labelKey: 'student.analytics' as TKey, active: tab === 'analytics', onClick: () => setTab('analytics') },
     { icon: <Award className="w-5 h-5" />, labelKey: 'dashboard.certificates' as TKey, active: tab === 'certificates', onClick: () => setTab('certificates') },
     { icon: <User className="w-5 h-5" />, labelKey: 'dashboard.profile' as TKey, active: tab === 'profile', onClick: () => setTab('profile') },
   ];
@@ -196,6 +205,37 @@ export default function StudentDashboard() {
             </div>
           )}
 
+          {/* Analytics */}
+          {tab === 'analytics' && (
+            <div className="space-y-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatBox icon={<Clock className="w-6 h-6" />} label={t('student.total_learning_time')} value={`${Math.round(watchSessions.reduce((s, w) => s + w.watched_seconds, 0) / 60)}min`} />
+                <StatBox icon={<CheckCircle className="w-6 h-6" />} label={t('student.completion_rate')} value={`${enrolledCourses.length > 0 ? Math.round(enrollments.reduce((s, e) => s + e.progress_pct, 0) / enrolledCourses.length) : 0}%`} />
+                <StatBox icon={<Award className="w-6 h-6" />} label={t('student.avg_quiz_score')} value={`${quizAttempts.length > 0 ? Math.round(quizAttempts.reduce((s, q) => s + q.score, 0) / quizAttempts.length) : 0}%`} />
+                <StatBox icon={<BookOpen className="w-6 h-6" />} label={t('dashboard.my_courses')} value={String(enrolledCourses.length)} />
+              </div>
+
+              <div className="card p-6">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('student.quiz_history')}</h3>
+                {quizAttempts.length === 0 ? (
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100">—</p>
+                ) : (
+                  <div className="space-y-2">
+                    {quizAttempts.map((qa, i) => (
+                      <div key={qa.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
+                        <span className="text-sm text-secondary-600 dark:text-white">Quiz #{i + 1}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold text-primary-500">{qa.score}%</span>
+                          {qa.passed ? <CheckCircle className="w-4 h-4 text-success-500" /> : <Lock className="w-4 h-4 text-alert-500" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Certificates */}
           {tab === 'certificates' && (
             <div>
@@ -240,15 +280,37 @@ export default function StudentDashboard() {
                 </div>
               </div>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between"><span className="text-secondary-400 dark:text-neutral-100">{t('pricing.title')}</span><span className="text-secondary-600 dark:text-white capitalize">{plan}</span></div>
-                <div className="flex justify-between"><span className="text-secondary-400 dark:text-neutral-100">Statut</span><span className="text-secondary-600 dark:text-white">{subscription?.status || '—'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-secondary-400 dark:text-neutral-100">{t('pricing.title')}</span><span className="text-secondary-600 dark:text-white capitalize">{plan}</span></div>
+                <div className="flex justify-between items-center"><span className="text-secondary-400 dark:text-neutral-100">Statut</span><span className="text-secondary-600 dark:text-white">{subscription?.status || '—'}</span></div>
+                <div className="flex justify-between items-center">
+                  <span className="text-secondary-400 dark:text-neutral-100 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> KYC</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${profile.kyc_status === 'approved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : profile.kyc_status === 'pending' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : profile.kyc_status === 'rejected' ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400'}`}>
+                    {profile.kyc_status || 'unverified'}
+                  </span>
+                </div>
                 <div className="flex justify-between"><span className="text-secondary-400 dark:text-neutral-100">{t('dashboard.my_courses')}</span><span className="text-secondary-600 dark:text-white">{enrolledCourses.length}</span></div>
                 <div className="flex justify-between"><span className="text-secondary-400 dark:text-neutral-100">{t('dashboard.certificates')}</span><span className="text-secondary-600 dark:text-white">{certificates.length}</span></div>
               </div>
+              {profile.document_url && (
+                <div className="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-secondary-600 flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-primary-500" />
+                  <a href={profile.document_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-500 hover:underline">{t('kyc.document_type')}</a>
+                </div>
+              )}
             </div>
           )}
         </>
       )}
     </DashboardLayout>
+  );
+}
+
+function StatBox({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="card p-6">
+      <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">{icon}</div>
+      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{value}</div>
+      <div className="text-sm text-secondary-400 dark:text-neutral-100">{label}</div>
+    </div>
   );
 }
