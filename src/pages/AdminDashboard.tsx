@@ -188,7 +188,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
     }
     // If promoting to super_admin, check whitelist
     if (newRole === 'super_admin' && !SUPER_ADMIN_EMAILS.includes(user.email)) {
-      setErrorMsg('Cet email n\'est pas dans la whitelist des Super Admins.');
+      setErrorMsg(t('admin.email_whitelist'));
       return;
     }
     const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', user.id);
@@ -476,7 +476,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                       <div key={course.id} className="card p-5 flex items-center justify-between">
                         <div>
                           <h4 className="font-semibold text-secondary-600 dark:text-white">{course.title}</h4>
-                          <p className="text-sm text-secondary-400 dark:text-neutral-100">{course.category} — {course.level} — {instructorNames[course.created_by] || 'Inconnu'}</p>
+                          <p className="text-sm text-secondary-400 dark:text-neutral-100">{course.category} — {course.level} — {instructorNames[course.created_by] || t('admin.unknown')}</p>
                         </div>
                         <div className="flex gap-2">
                           <button onClick={() => approveCourse(course.id)} className="p-2 rounded-lg bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400"><CheckCircle className="w-5 h-5" /></button>
@@ -532,7 +532,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
               <div className="flex gap-2 flex-wrap">
                 {(['pending', 'approved', 'rejected', 'all'] as const).map((status) => (
                   <button key={status} onClick={() => setKycFilter(status)} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${kycFilter === status ? 'bg-primary-500 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100'}`}>
-                    {status === 'all' ? 'Tous' : status === 'pending' ? t('admin.kyc_pending') : status === 'approved' ? t('admin.kyc_approved') : t('admin.kyc_rejected')}
+                    {status === 'all' ? t('admin.kyc_all') : status === 'pending' ? t('admin.kyc_pending') : status === 'approved' ? t('admin.kyc_approved') : t('admin.kyc_rejected')}
                   </button>
                 ))}
               </div>
@@ -549,7 +549,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-secondary-600 dark:text-white">{kycUserNames[doc.user_id] || 'Utilisateur'}</h4>
+                            <h4 className="font-semibold text-secondary-600 dark:text-white">{kycUserNames[doc.user_id] || t('admin.user_default')}</h4>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${doc.status === 'approved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : doc.status === 'pending' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400'}`}>
                               {doc.status}
                             </span>
@@ -679,7 +679,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
               <form onSubmit={createRole} className="card p-6 flex gap-3 items-end max-w-lg">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('admin.role_name')}</label>
-                  <input type="text" required value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} className="input-field" placeholder="Modérateur, Support..." />
+                  <input type="text" required value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} className="input-field" placeholder={t('admin.role_placeholder')} />
                 </div>
                 <button type="submit" className="btn-primary flex items-center gap-2"><UserCog className="w-5 h-5" /> {t('admin.create_role')}</button>
               </form>

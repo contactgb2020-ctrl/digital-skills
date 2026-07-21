@@ -46,7 +46,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold mb-4">Liens</h4>
+            <h4 className="font-heading font-semibold mb-4">{t('footer.links')}</h4>
             <ul className="space-y-2 text-sm text-secondary-200">
               {links.map((link, i) => (
                 <li key={i} className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate(link.route)}>

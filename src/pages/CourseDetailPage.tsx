@@ -169,7 +169,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
   if (!course) {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
-        <p className="text-secondary-400 dark:text-neutral-100">Cours introuvable</p>
+        <p className="text-secondary-400 dark:text-neutral-100">{t('course.not_found')}</p>
       </div>
     );
   }
@@ -240,7 +240,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
           {activeTab === 'overview' && (
             <div className="card p-6 animate-fade-in">
               <h2 className="text-xl font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('course.overview')}</h2>
-              <p className="text-secondary-400 dark:text-neutral-100 leading-relaxed">{course.description || 'Aucune description disponible.'}</p>
+              <p className="text-secondary-400 dark:text-neutral-100 leading-relaxed">{course.description || t('course.no_description')}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
                 <InfoBox icon={<BookOpen className="w-5 h-5" />} label={t('course.lessons')} value={String(totalLessons)} />
                 <InfoBox icon={<BarChartIcon />} label={t('course.duration')} value={`${lessons.reduce((s, l) => s + l.duration, 0)}s`} />
@@ -305,7 +305,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                       </button>
                     ))}
                   </div>
-                  <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={3} className="input-field mb-3" placeholder="Votre avis..." />
+                  <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={3} className="input-field mb-3" placeholder={t('course.review_placeholder')} />
                   <button onClick={handleSubmitReview} className="btn-primary">{t('course.submit_review')}</button>
                 </div>
               )}
@@ -365,7 +365,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                 )}
                 {certificate && (
                   <div className="text-xs text-secondary-400 dark:text-neutral-100 mb-3">
-                    N° {certificate.certificate_number}
+                    {t('course.cert_number')} {certificate.certificate_number}
                   </div>
                 )}
               </>

@@ -72,7 +72,7 @@ export default function PricingPage() {
             >
               {plan.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary-500 text-white text-sm font-semibold">
-                  Populaire
+                  {t('pricing.popular')}
                 </div>
               )}
               <h2 className="text-xl font-heading font-bold text-secondary-600 dark:text-white mb-1">{t(plan.name)}</h2>

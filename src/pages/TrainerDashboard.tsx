@@ -8,6 +8,7 @@ import type { Course, Lesson, Quiz, Enrollment, Review, Category, TrainerEarning
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
+const LEVEL_KEYS: Record<string, string> = { 'Débutant': 'level.beginner', 'Intermédiaire': 'level.intermediate', 'Avancé': 'level.advanced' };
 
 export default function TrainerDashboard() {
   const { t } = useLanguage();
@@ -20,8 +21,8 @@ export default function TrainerDashboard() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-alert-100 dark:bg-alert-600/20 flex items-center justify-center">
             <XCircle className="w-8 h-8 text-alert-500" />
           </div>
-          <p className="text-secondary-600 dark:text-white font-semibold mb-2">Accès refusé</p>
-          <p className="text-sm text-secondary-400 dark:text-neutral-100">Votre compte n'a pas le rôle formateur. Contactez l'administrateur.</p>
+          <p className="text-secondary-600 dark:text-white font-semibold mb-2">{t('trainer.access_denied')}</p>
+          <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('trainer.access_denied_msg')}</p>
         </div>
       </div>
     );
@@ -327,7 +328,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.level')}</label>
                   <select value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })} className="input-field">
-                    {LEVELS.map((lvl) => <option key={lvl} value={lvl}>{lvl}</option>)}
+                    {LEVELS.map((lvl) => <option key={lvl} value={lvl}>{t(LEVEL_KEYS[lvl] as TKey)}</option>)}
                   </select>
                 </div>
               </div>
@@ -388,7 +389,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.answers')}</label>
-                  <textarea required rows={4} value={quizForm.answers} onChange={(e) => setQuizForm({ ...quizForm, answers: e.target.value })} className="input-field" placeholder="Réponse 1&#10;Réponse 2&#10;Réponse 3&#10;Réponse 4" />
+                  <textarea required rows={4} value={quizForm.answers} onChange={(e) => setQuizForm({ ...quizForm, answers: e.target.value })} className="input-field" placeholder={t('trainer.answers_placeholder')} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.correct_answer')}</label>

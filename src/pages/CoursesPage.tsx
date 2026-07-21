@@ -8,6 +8,7 @@ import type { Course, Subscription, Review, Category } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
+const LEVEL_KEYS: Record<string, string> = { 'Débutant': 'level.beginner', 'Intermédiaire': 'level.intermediate', 'Avancé': 'level.advanced' };
 
 export default function CoursesPage() {
   const { t } = useLanguage();
@@ -73,7 +74,7 @@ export default function CoursesPage() {
         {/* Category filters */}
         <div className="flex flex-wrap gap-2 mb-4">
           <button onClick={() => setActiveCategory(null)} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${!activeCategory ? 'bg-primary-500 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100'}`}>
-            Toutes
+            {t('courses.all')}
           </button>
           {categories.map((cat) => (
             <button key={cat.id} onClick={() => setActiveCategory(cat.name)} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat.name ? 'bg-primary-500 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100'}`}>
@@ -85,11 +86,11 @@ export default function CoursesPage() {
         {/* Level filters */}
         <div className="flex flex-wrap gap-2 mb-8">
           <button onClick={() => setActiveLevel(null)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!activeLevel ? 'bg-secondary-600 dark:bg-secondary-800 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
-            Tous niveaux
+            {t('courses.all_levels')}
           </button>
           {LEVELS.map((lvl) => (
             <button key={lvl} onClick={() => setActiveLevel(lvl)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${activeLevel === lvl ? 'bg-secondary-600 dark:bg-secondary-800 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
-              {lvl}
+              {t(LEVEL_KEYS[lvl] as TKey)}
             </button>
           ))}
         </div>
@@ -127,7 +128,7 @@ export default function CoursesPage() {
                     <span className="text-xs font-medium text-primary-500">{course.category}</span>
                     <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-2 line-clamp-2">{course.title}</h3>
                     <div className="flex items-center gap-3 text-xs text-secondary-400 dark:text-neutral-100 mb-2">
-                      <span>{course.level}</span>
+                      <span>{t(LEVEL_KEYS[course.level] as TKey) || course.level}</span>
                       {rating && (
                         <span className="flex items-center gap-1">
                           <Star className="w-3 h-3 fill-primary-400 text-primary-400" /> {rating.avg.toFixed(1)} ({rating.count})

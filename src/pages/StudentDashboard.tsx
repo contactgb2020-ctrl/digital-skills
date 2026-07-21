@@ -78,7 +78,7 @@ export default function StudentDashboard() {
         <div className="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-600/20 border border-primary-200 dark:border-primary-600 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Clock className="w-5 h-5 text-primary-500" />
-            <span className="text-sm text-secondary-600 dark:text-neutral-100">{t('onboarding.trial')} — Plan: {plan}</span>
+            <span className="text-sm text-secondary-600 dark:text-neutral-100">{t('onboarding.trial')} — {t('student.plan_label')}: {plan}</span>
           </div>
           <button onClick={() => navigate('/pricing')} className="btn-primary text-sm px-4 py-2">{t('dashboard.unlock')}</button>
         </div>
@@ -223,7 +223,7 @@ export default function StudentDashboard() {
                   <div className="space-y-2">
                     {quizAttempts.map((qa, i) => (
                       <div key={qa.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
-                        <span className="text-sm text-secondary-600 dark:text-white">Quiz #{i + 1}</span>
+                        <span className="text-sm text-secondary-600 dark:text-white">{t('student.kyc_label')} #{i + 1}</span>
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-semibold text-primary-500">{qa.score}%</span>
                           {qa.passed ? <CheckCircle className="w-4 h-4 text-success-500" /> : <Lock className="w-4 h-4 text-alert-500" />}
@@ -242,7 +242,7 @@ export default function StudentDashboard() {
               {certificates.length === 0 ? (
                 <div className="card p-8 text-center">
                   <Award className="w-16 h-16 text-secondary-400 mx-auto mb-4" />
-                  <p className="text-secondary-400 dark:text-neutral-100">Aucun certificat pour le moment. Terminez une formation pour obtenir le vôtre !</p>
+                  <p className="text-secondary-400 dark:text-neutral-100">{t('student.no_certificates')}</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -253,8 +253,8 @@ export default function StudentDashboard() {
                         <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                           <Award className="w-8 h-8 text-white" />
                         </div>
-                        <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1">{course?.title || 'Formation'}</h3>
-                        <p className="text-xs text-secondary-400 dark:text-neutral-100 mb-2">N° {cert.certificate_number}</p>
+                        <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1">{course?.title || t('student.formation')}</h3>
+                        <p className="text-xs text-secondary-400 dark:text-neutral-100 mb-2">{t('student.cert_number')} {cert.certificate_number}</p>
                         <p className="text-xs text-secondary-400 dark:text-neutral-100">{new Date(cert.created_at).toLocaleDateString()}</p>
                       </div>
                     );
@@ -272,7 +272,7 @@ export default function StudentDashboard() {
                   {profile.nom?.charAt(0) || profile.email.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-secondary-600 dark:text-white">{profile.nom || 'Utilisateur'}</h3>
+                  <h3 className="font-heading font-bold text-secondary-600 dark:text-white">{profile.nom || t('admin.user_default')}</h3>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100">{profile.email}</p>
                   <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 text-xs font-medium">
                     {profile.role}
@@ -281,9 +281,9 @@ export default function StudentDashboard() {
               </div>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center"><span className="text-secondary-400 dark:text-neutral-100">{t('pricing.title')}</span><span className="text-secondary-600 dark:text-white capitalize">{plan}</span></div>
-                <div className="flex justify-between items-center"><span className="text-secondary-400 dark:text-neutral-100">Statut</span><span className="text-secondary-600 dark:text-white">{subscription?.status || '—'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-secondary-400 dark:text-neutral-100">{t('student.status')}</span><span className="text-secondary-600 dark:text-white">{subscription?.status || '—'}</span></div>
                 <div className="flex justify-between items-center">
-                  <span className="text-secondary-400 dark:text-neutral-100 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> KYC</span>
+                  <span className="text-secondary-400 dark:text-neutral-100 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> {t('student.kyc_label')}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${profile.kyc_status === 'approved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : profile.kyc_status === 'pending' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : profile.kyc_status === 'rejected' ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400'}`}>
                     {profile.kyc_status || 'unverified'}
                   </span>
