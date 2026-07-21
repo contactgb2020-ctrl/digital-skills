@@ -1,5 +1,8 @@
 name = "digital-skills-africa"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "dist"
-VITE_SUPABASE_URL = https://wqsthhkiareymkmmalpv.supabase.co
-VITE_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3RoaGtpYXJleW1rbW1hbHB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDU4MjEsImV4cCI6MjEwMDIyMTgyMX0.AnWR0hHQHAarxvtS7zWIIQ1-icMbDraZqlhxqG2VcSs
+pages_build_output_dir = "dist"
+
+[vars]
+VITE_SUPABASE_URL = "https://wqsthhkiareymkmmalpv.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc3RoaGtpYXJleW1rbW1hbHB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDU4MjEsImV4cCI6MjEwMDIyMTgyMX0.AnWR0hHQHAarxvtS7zWIIQ1-icMbDraZqlhxqG2VcSs"
