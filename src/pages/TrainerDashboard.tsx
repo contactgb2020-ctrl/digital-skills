@@ -367,7 +367,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 {formData.image && !formData.imageFile && <p className="text-xs text-secondary-400 mt-1">{formData.image}</p>}
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" className="btn-primary">{t('trainer.save')}</button>
+                <button type="submit" disabled={uploading} className="btn-primary disabled:opacity-60">{uploading ? t('auth.loading') : t('trainer.save')}</button>
                 <button type="button" onClick={() => { setShowForm(false); setEditingCourse(null); setTab('courses'); }} className="btn-outline">{t('trainer.cancel')}</button>
               </div>
             </form>

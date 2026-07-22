@@ -6,6 +6,7 @@ import {
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getPrivateFileUrl } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
 import type { Profile, Course, LocationSuggestion, Subscription, Payment, KycDocument, Category, TrainerEarning, CustomRole, RolePermission, StaffMember } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
@@ -558,9 +559,9 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                             {t('admin.kyc_type')}: {doc.document_type} — {t('admin.kyc_submitted')}: {new Date(doc.created_at).toLocaleDateString()}
                           </p>
                           {doc.file_url && (
-                            <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary-500 hover:underline">
+                            <button onClick={async () => { const url = await getPrivateFileUrl(doc.document_type === 'diploma' ? 'diplomas' : 'kyc-documents', doc.file_url); if (url) window.open(url, '_blank'); }} className="inline-flex items-center gap-2 text-sm text-primary-500 hover:underline">
                               <FileCheck className="w-4 h-4" /> {t('admin.kyc_document')}
-                            </a>
+                            </button>
                           )}
                           {doc.rejection_reason && (
                             <p className="text-sm text-alert-500 mt-2">Motif: {doc.rejection_reason}</p>

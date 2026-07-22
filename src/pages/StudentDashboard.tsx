@@ -4,6 +4,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getPrivateFileUrl } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
 import type { Course, Progress, Subscription, Enrollment, Certificate, QuizAttempt } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
@@ -313,7 +314,7 @@ export default function StudentDashboard() {
               {profile.document_url && (
                 <div className="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-secondary-600 flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-primary-500" />
-                  <a href={profile.document_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-500 hover:underline">{t('kyc.document_type')}</a>
+                  <button onClick={async () => { const url = await getPrivateFileUrl('kyc-documents', profile.document_url!); if (url) window.open(url, '_blank'); }} className="text-sm text-primary-500 hover:underline">{t('kyc.document_type')}</button>
                 </div>
               )}
             </div>
