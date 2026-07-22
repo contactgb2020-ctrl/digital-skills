@@ -4,6 +4,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { uploadPrivateFile } from '../lib/upload';
 import type { Country, Region, City, District } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
@@ -44,8 +45,9 @@ export default function SignupPage() {
   const [selectedPlan, setSelectedPlan] = useState('starter');
   const [selectedRole, setSelectedRole] = useState<'student' | 'trainer'>('student');
   const [documentType, setDocumentType] = useState('national_id');
-  const [documentUrl, setDocumentUrl] = useState('');
-  const [diplomaUrl, setDiplomaUrl] = useState('');
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [diplomaFile, setDiplomaFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Load countries on mount
   useEffect(() => {
@@ -169,6 +171,24 @@ export default function SignupPage() {
     const { data: userData } = await supabase.auth.getUser();
     const user = userData.user;
     if (user) {
+      let docPath: string | null = null;
+      let dipPath: string | null = null;
+
+      if (documentFile) {
+        setUploading(true);
+        const { path, error: upErr } = await uploadPrivateFile('kyc-documents', documentFile, user.id);
+        setUploading(false);
+        if (upErr) { setError('upload.error'); setLoading(false); return; }
+        docPath = path;
+      }
+      if (diplomaFile && selectedRole === 'trainer') {
+        setUploading(true);
+        const { path, error: upErr } = await uploadPrivateFile('diplomas', diplomaFile, user.id);
+        setUploading(false);
+        if (upErr) { setError('upload.error'); setLoading(false); return; }
+        dipPath = path;
+      }
+
       await supabase.from('profiles').update({
         nom: nom.trim(),
         role: selectedRole,
@@ -176,17 +196,25 @@ export default function SignupPage() {
         region_id: selectedRegion || null,
         city_id: selectedCity || null,
         district_id: selectedDistrict || null,
-        kyc_status: documentUrl ? 'pending' : 'unverified',
+        kyc_status: docPath ? 'pending' : 'unverified',
         document_type: documentType || null,
-        document_url: documentUrl || null,
+        document_url: docPath || null,
       }).eq('id', user.id);
 
       // Insert KYC document if uploaded
-      if (documentUrl) {
+      if (docPath) {
         await supabase.from('kyc_documents').insert({
           user_id: user.id,
           document_type: documentType,
-          file_url: documentUrl,
+          file_url: docPath,
+          status: 'pending',
+        });
+      }
+      if (dipPath) {
+        await supabase.from('kyc_documents').insert({
+          user_id: user.id,
+          document_type: 'diploma',
+          file_url: dipPath,
           status: 'pending',
         });
       }
@@ -481,11 +509,17 @@ export default function SignupPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.upload')} (URL)</label>
+                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.upload')}</label>
                 <div className="relative">
-                  <Upload className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
-                  <input type="url" value={documentUrl} onChange={(e) => setDocumentUrl(e.target.value)} className="input-field pl-10" placeholder="https://..." />
+                  <Upload className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400 pointer-events-none" />
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                    className="input-field pl-10 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary-50 file:text-primary-600"
+                  />
                 </div>
+                {documentFile && <p className="text-xs text-success-500 mt-1">{documentFile.name}</p>}
               </div>
 
               {selectedRole === 'trainer' && (
@@ -494,11 +528,17 @@ export default function SignupPage() {
                     {t('kyc.trainer_extra')}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.diploma')} (URL)</label>
+                    <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('kyc.diploma')}</label>
                     <div className="relative">
-                      <FileCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
-                      <input type="url" value={diplomaUrl} onChange={(e) => setDiplomaUrl(e.target.value)} className="input-field pl-10" placeholder="https://..." />
+                      <FileCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400 pointer-events-none" />
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => setDiplomaFile(e.target.files?.[0] || null)}
+                        className="input-field pl-10 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary-50 file:text-primary-600"
+                      />
                     </div>
+                    {diplomaFile && <p className="text-xs text-success-500 mt-1">{diplomaFile.name}</p>}
                   </div>
                 </>
               )}
@@ -564,8 +604,8 @@ export default function SignupPage() {
                 <button type="button" onClick={() => setStep(5)} className="btn-outline flex items-center gap-2">
                   <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
                 </button>
-                <button type="button" onClick={handleFinish} disabled={loading} className="btn-primary flex-1 disabled:opacity-60">
-                  {loading ? t('auth.loading') : t('onboarding.finish')}
+                <button type="button" onClick={handleFinish} disabled={loading || uploading} className="btn-primary flex-1 disabled:opacity-60">
+                  {loading || uploading ? t('auth.loading') : t('onboarding.finish')}
                 </button>
               </div>
             </div>

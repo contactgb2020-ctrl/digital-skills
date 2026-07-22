@@ -21,6 +21,8 @@ export default function StudentDashboard() {
   const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
   const [watchSessions, setWatchSessions] = useState<{ course_id: string; watched_seconds: number }[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,6 +55,9 @@ export default function StudentDashboard() {
 
       const { data: subData } = await supabase.from('subscriptions').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (subData) setSubscription(subData as Subscription);
+
+      const { data: catData } = await supabase.from('categories').select('id, name').order('name');
+      if (catData) setCategories(catData as { id: string; name: string }[]);
 
       setLoading(false);
     })();
@@ -139,8 +144,21 @@ export default function StudentDashboard() {
 
           {/* Catalog */}
           {tab === 'catalog' && (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allCourses.map((course) => {
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setActiveCategory('all')} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${activeCategory === 'all' ? 'bg-secondary-600 dark:bg-secondary-800 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                  {t('courses.all')}
+                </button>
+                {categories.map((cat) => (
+                  <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${activeCategory === cat.id ? 'bg-secondary-600 dark:bg-secondary-800 text-white' : 'bg-white dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allCourses
+                .filter((course) => activeCategory === 'all' || course.category_id === activeCategory)
+                .map((course) => {
                 const locked = !isPremium && course.level === 'Avancé';
                 return (
                   <div key={course.id} className="card overflow-hidden hover:scale-105 transition-transform relative cursor-pointer" onClick={() => !locked && navigate(`/course/${course.id}`)}>
@@ -172,6 +190,7 @@ export default function StudentDashboard() {
                   </div>
                 );
               })}
+            </div>
             </div>
           )}
 

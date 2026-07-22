@@ -3,6 +3,7 @@ import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronD
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { uploadFile } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
 import type { Course, Lesson, Quiz, Enrollment, Review, Category, TrainerEarning } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
@@ -45,11 +46,12 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const [courseReviews, setCourseReviews] = useState<Record<string, Review[]>>({});
 
   const [formData, setFormData] = useState({
-    title: '', description: '', category: '', category_id: '', level: 'Débutant', image: '',
+    title: '', description: '', category: '', category_id: '', level: 'Débutant', imageFile: null as File | null, image: '',
   });
 
-  const [lessonForm, setLessonForm] = useState({ courseId: '', title: '', video_url: '', document_url: '', duration: 0, order_number: 0 });
+  const [lessonForm, setLessonForm] = useState({ courseId: '', title: '', videoFile: null as File | null, duration: 0, order_number: 0 });
   const [showLessonForm, setShowLessonForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [quizForm, setQuizForm] = useState({ lessonId: '', question: '', answers: '', correct_answer: 0, explanation: '' });
   const [showQuizForm, setShowQuizForm] = useState(false);
@@ -90,10 +92,20 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const handleCreate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!session?.user) return;
+
+    let imageUrl = formData.image;
+    if (formData.imageFile) {
+      setUploading(true);
+      const { url, error: upErr } = await uploadFile('course-images', formData.imageFile, session.user.id);
+      setUploading(false);
+      if (upErr) { alert(upErr); return; }
+      imageUrl = url || '';
+    }
+
     if (editingCourse) {
       const { data } = await supabase.from('courses').update({
         title: formData.title, description: formData.description,
-        category: formData.category, category_id: formData.category_id, level: formData.level, image: formData.image,
+        category: formData.category, category_id: formData.category_id, level: formData.level, image: imageUrl,
       }).eq('id', editingCourse.id).select().single();
       if (data) {
         setCourses(courses.map((c) => (c.id === editingCourse.id ? data as Course : c)));
@@ -103,21 +115,21 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
       const { data } = await supabase.from('courses').insert({
         title: formData.title, description: formData.description, category: formData.category,
         category_id: formData.category_id || null,
-        level: formData.level, image: formData.image, created_by: session.user.id, status: 'pending_review',
+        level: formData.level, image: imageUrl, created_by: session.user.id, status: 'pending_review',
       }).select().single();
       if (data) {
         setCourses([data as Course, ...courses]);
         setCourseLessons({ ...courseLessons, [(data as Course).id]: [] });
       }
     }
-    setFormData({ title: '', description: '', category: categories.length > 0 ? categories[0].name : '', category_id: categories.length > 0 ? categories[0].id : '', level: 'Débutant', image: '' });
+    setFormData({ title: '', description: '', category: categories.length > 0 ? categories[0].name : '', category_id: categories.length > 0 ? categories[0].id : '', level: 'Débutant', imageFile: null, image: '' });
     setShowForm(false);
     setTab('courses');
   }, [session, editingCourse, formData, courses, courseLessons]);
 
   const handleEdit = useCallback((course: Course) => {
     setEditingCourse(course);
-    setFormData({ title: course.title, description: course.description, category: course.category, category_id: course.category_id || '', level: course.level, image: course.image });
+    setFormData({ title: course.title, description: course.description, category: course.category, category_id: course.category_id || '', level: course.level, imageFile: null, image: course.image });
     setShowForm(true);
     setTab('create');
   }, []);
@@ -135,19 +147,30 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
   const handleAddLesson = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session?.user) return;
+
+    let videoUrl = '';
+    if (lessonForm.videoFile) {
+      setUploading(true);
+      const { url, error: upErr } = await uploadFile('course-videos', lessonForm.videoFile, session.user.id);
+      setUploading(false);
+      if (upErr) { alert(upErr); return; }
+      videoUrl = url || '';
+    }
+
     const { data } = await supabase.from('lessons').insert({
-      course_id: lessonForm.courseId, title: lessonForm.title, video_url: lessonForm.video_url,
-      document_url: lessonForm.document_url, duration: lessonForm.duration, order_number: lessonForm.order_number,
+      course_id: lessonForm.courseId, title: lessonForm.title, video_url: videoUrl,
+      document_url: '', duration: lessonForm.duration, order_number: lessonForm.order_number,
     }).select().single();
     if (data) {
       setCourseLessons({
         ...courseLessons,
         [lessonForm.courseId]: [...(courseLessons[lessonForm.courseId] || []), data as Lesson].sort((a, b) => a.order_number - b.order_number),
       });
-      setLessonForm({ courseId: '', title: '', video_url: '', document_url: '', duration: 0, order_number: 0 });
+      setLessonForm({ courseId: '', title: '', videoFile: null, duration: 0, order_number: 0 });
       setShowLessonForm(false);
     }
-  }, [lessonForm, courseLessons]);
+  }, [lessonForm, courseLessons, session]);
 
   const handleDeleteLesson = useCallback(async (lessonId: string, courseId: string) => {
     await supabase.from('lessons').delete().eq('id', lessonId);
@@ -333,8 +356,15 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.image')} (URL)</label>
-                <input type="url" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} className="input-field" placeholder="https://..." />
+                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.image')}</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFormData({ ...formData, imageFile: e.target.files?.[0] || null })}
+                  className="input-field file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary-50 file:text-primary-600"
+                />
+                {formData.imageFile && <p className="text-xs text-success-500 mt-1">{formData.imageFile.name}</p>}
+                {formData.image && !formData.imageFile && <p className="text-xs text-secondary-400 mt-1">{formData.image}</p>}
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" className="btn-primary">{t('trainer.save')}</button>
@@ -354,11 +384,13 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.video_url')}</label>
-                  <input type="url" value={lessonForm.video_url} onChange={(e) => setLessonForm({ ...lessonForm, video_url: e.target.value })} className="input-field" placeholder="https://..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.document_url')}</label>
-                  <input type="url" value={lessonForm.document_url} onChange={(e) => setLessonForm({ ...lessonForm, document_url: e.target.value })} className="input-field" placeholder="https://..." />
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => setLessonForm({ ...lessonForm, videoFile: e.target.files?.[0] || null })}
+                    className="input-field file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary-50 file:text-primary-600"
+                  />
+                  {lessonForm.videoFile && <p className="text-xs text-success-500 mt-1">{lessonForm.videoFile.name}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -371,7 +403,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button type="submit" className="btn-primary">{t('trainer.save')}</button>
+                  <button type="submit" disabled={uploading} className="btn-primary disabled:opacity-60">{uploading ? t('auth.loading') : t('trainer.save')}</button>
                   <button type="button" onClick={() => setShowLessonForm(false)} className="btn-outline">{t('trainer.cancel')}</button>
                 </div>
               </form>
