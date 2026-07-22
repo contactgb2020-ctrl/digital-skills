@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText, Wallet, DollarSign } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Award, Layers, Play } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -72,7 +72,6 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
     const { data } = await supabase.from('courses').select('*').eq('created_by', session.user.id).order('created_at', { ascending: false });
     if (data) {
       setCourses(data as Course[]);
-      // Load lessons, enrollments, reviews for each course
       for (const course of data as Course[]) {
         const { data: lessons } = await supabase.from('lessons').select('*').eq('course_id', course.id).order('order_number', { ascending: true });
         if (lessons) setCourseLessons((prev) => ({ ...prev, [course.id]: lessons as Lesson[] }));
@@ -204,13 +203,29 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const totalStudents = Object.values(courseEnrollments).reduce((s, n) => s + n, 0);
   const allReviews = Object.values(courseReviews).flat();
   const avgRating = allReviews.length > 0 ? allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length : 0;
+  const publishedCount = courses.filter((c) => c.status === 'published').length;
+  const pendingCount = courses.filter((c) => c.status === 'pending_review').length;
+  const totalLessons = Object.values(courseLessons).flat().length;
+  const totalWatchHours = earnings.reduce((s, e) => s + Number(e.total_watch_hours), 0);
+  const pendingPayment = earnings.filter((e) => e.status === 'pending').reduce((s, e) => s + Number(e.amount_due), 0);
+  const paidAmount = earnings.filter((e) => e.status === 'paid').reduce((s, e) => s + Number(e.amount_due), 0);
 
   return (
     <DashboardLayout title={`${t('dashboard.welcome')}, ${profile.nom}`} items={sidebarItems} currentRoute="/trainer" userRole={profile.role}>
-      <div className="mb-4 p-3 rounded-xl bg-success-50 dark:bg-success-600/20 border border-success-200 dark:border-success-600 flex items-center gap-2">
+      {/* Free dashboard banner */}
+      <div className="mb-6 p-4 rounded-xl bg-success-50 dark:bg-success-600/20 border border-success-200 dark:border-success-600 flex items-center gap-3">
         <CheckCircle className="w-5 h-5 text-success-500" />
         <span className="text-sm text-success-600 dark:text-success-400">{t('trainer.free_dashboard')}</span>
       </div>
+
+      {/* Quick stats bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <QuickStat icon={<BookOpen className="w-5 h-5" />} label={t('trainer.my_courses')} value={courses.length} color="primary" />
+        <QuickStat icon={<Users className="w-5 h-5" />} label={t('trainer.total_students')} value={totalStudents} color="success" />
+        <QuickStat icon={<Star className="w-5 h-5" />} label={t('trainer.avg_rating')} value={Number(avgRating.toFixed(1))} color="accent" />
+        <QuickStat icon={<Wallet className="w-5 h-5" />} label={t('trainer.amount_due')} value={`$${pendingPayment.toFixed(2)}`} color="warning" />
+      </div>
+
       {loading ? (
         <div className="text-center py-12 text-secondary-400 dark:text-neutral-100">{t('common.loading')}</div>
       ) : (
@@ -219,9 +234,12 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
           {tab === 'courses' && (
             <div className="space-y-4">
               {courses.length === 0 && (
-                <div className="text-center py-12">
-                  <BookOpen className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
-                  <p className="text-secondary-400 dark:text-neutral-100 mb-4">{t('dashboard.no_courses')}</p>
+                <div className="card p-12 text-center">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
+                    <BookOpen className="w-10 h-10 text-primary-500" />
+                  </div>
+                  <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('dashboard.no_courses')}</p>
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">Créez votre premier cours et partagez votre expertise</p>
                   <button onClick={() => { setTab('create'); setShowForm(true); }} className="btn-primary inline-flex items-center gap-2">
                     <Plus className="w-5 h-5" /> {t('trainer.create_course')}
                   </button>
@@ -236,7 +254,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 const isExpanded = expandedCourse === course.id;
 
                 return (
-                  <div key={course.id} className="card overflow-hidden">
+                  <div key={course.id} className="card overflow-hidden hover:shadow-md transition-shadow">
                     <div className="p-5">
                       <div className="flex items-start gap-4">
                         <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
@@ -253,8 +271,8 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                           <p className="text-sm text-secondary-400 dark:text-neutral-100 line-clamp-2 mb-2">{course.description}</p>
                           <div className="flex flex-wrap items-center gap-3 text-xs">
                             <StatusBadge status={course.status} t={t} />
-                            <span className="text-secondary-400 dark:text-neutral-100">{lessons.length} {t('course.lessons').toLowerCase()}</span>
-                            <span className="text-secondary-400 dark:text-neutral-100">{enrollCount} {t('course.students')}</span>
+                            <span className="text-secondary-400 dark:text-neutral-100 flex items-center gap-1"><Layers className="w-3 h-3" /> {lessons.length} {t('course.lessons').toLowerCase()}</span>
+                            <span className="text-secondary-400 dark:text-neutral-100 flex items-center gap-1"><Users className="w-3 h-3" /> {enrollCount} {t('course.students')}</span>
                             {rating > 0 && (
                               <span className="flex items-center gap-1 text-secondary-400 dark:text-neutral-100">
                                 <Star className="w-3 h-3 fill-primary-400 text-primary-400" /> {rating.toFixed(1)}
@@ -263,19 +281,18 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                           </div>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <button onClick={() => handleEdit(course)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 text-secondary-400" title={t('trainer.edit_course')}>
+                          <button onClick={() => handleEdit(course)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 text-secondary-400 transition-colors" title={t('trainer.edit_course')}>
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleDelete(course.id)} className="p-2 rounded-lg hover:bg-alert-50 dark:hover:bg-alert-600/20 text-alert-500" title={t('trainer.delete_course')}>
+                          <button onClick={() => handleDelete(course.id)} className="p-2 rounded-lg hover:bg-alert-50 dark:hover:bg-alert-600/20 text-alert-500 transition-colors" title={t('trainer.delete_course')}>
                             <Trash2 className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setExpandedCourse(isExpanded ? null : course.id)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 text-secondary-400">
+                          <button onClick={() => setExpandedCourse(isExpanded ? null : course.id)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 text-secondary-400 transition-colors">
                             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
 
-                      {/* Expanded: lessons management */}
                       {isExpanded && (
                         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-secondary-500 animate-fade-in">
                           <div className="flex items-center justify-between mb-3">
@@ -300,10 +317,10 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                                       <span>{lesson.duration}s</span>
                                     </div>
                                   </div>
-                                  <button onClick={() => { setQuizForm({ ...quizForm, lessonId: lesson.id }); setShowQuizForm(true); }} className="p-1.5 rounded hover:bg-primary-50 dark:hover:bg-primary-600/20 text-primary-500" title={t('trainer.add_quiz')}>
+                                  <button onClick={() => { setQuizForm({ ...quizForm, lessonId: lesson.id }); setShowQuizForm(true); }} className="p-1.5 rounded hover:bg-primary-50 dark:hover:bg-primary-600/20 text-primary-500 transition-colors" title={t('trainer.add_quiz')}>
                                     <HelpCircle className="w-4 h-4" />
                                   </button>
-                                  <button onClick={() => handleDeleteLesson(lesson.id, course.id)} className="p-1.5 rounded hover:bg-alert-50 dark:hover:bg-alert-600/20 text-alert-500">
+                                  <button onClick={() => handleDeleteLesson(lesson.id, course.id)} className="p-1.5 rounded hover:bg-alert-50 dark:hover:bg-alert-600/20 text-alert-500 transition-colors">
                                     <Trash2 className="w-4 h-4" />
                                   </button>
                                 </div>
@@ -448,15 +465,18 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               </div>
 
               <div className="grid sm:grid-cols-3 gap-6">
-                <StatCard icon={<Clock className="w-6 h-6" />} label={t('trainer.watch_hours')} value={earnings.reduce((s, e) => s + Number(e.total_watch_hours), 0)} />
-                <StatCard icon={<Wallet className="w-6 h-6" />} label={t('trainer.amount_due')} value={earnings.filter((e) => e.status === 'pending').reduce((s, e) => s + Number(e.amount_due), 0)} prefix="$" />
-                <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.amount_paid')} value={earnings.filter((e) => e.status === 'paid').reduce((s, e) => s + Number(e.amount_due), 0)} prefix="$" />
+                <StatCard icon={<Clock className="w-6 h-6" />} label={t('trainer.watch_hours')} value={`${totalWatchHours}h`} color="primary" />
+                <StatCard icon={<Wallet className="w-6 h-6" />} label={t('trainer.amount_due')} value={`$${pendingPayment.toFixed(2)}`} color="warning" />
+                <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.amount_paid')} value={`$${paidAmount.toFixed(2)}`} color="success" />
               </div>
 
               <div className="card p-6">
                 <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.earnings_history')}</h3>
                 {earnings.length === 0 ? (
-                  <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('trainer.no_earnings')}</p>
+                  <div className="text-center py-8">
+                    <Wallet className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
+                    <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('trainer.no_earnings')}</p>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     {earnings.map((e) => (
@@ -483,10 +503,16 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
           {tab === 'stats' && (
             <div className="space-y-6">
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={<BookOpen className="w-6 h-6" />} label={t('trainer.my_courses')} value={courses.length} />
-                <StatCard icon={<Users className="w-6 h-6" />} label={t('trainer.total_students')} value={totalStudents} />
-                <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.published')} value={courses.filter((c) => c.status === 'published').length} />
-                <StatCard icon={<Star className="w-6 h-6" />} label={t('trainer.avg_rating')} value={Number(avgRating.toFixed(1))} />
+                <StatCard icon={<BookOpen className="w-6 h-6" />} label={t('trainer.my_courses')} value={String(courses.length)} color="primary" />
+                <StatCard icon={<Users className="w-6 h-6" />} label={t('trainer.total_students')} value={String(totalStudents)} color="success" />
+                <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.published')} value={String(publishedCount)} color="accent" />
+                <StatCard icon={<Star className="w-6 h-6" />} label={t('trainer.avg_rating')} value={avgRating.toFixed(1)} color="warning" />
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-6">
+                <StatCard icon={<Layers className="w-6 h-6" />} label={t('course.lessons')} value={String(totalLessons)} color="primary" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label={t('trainer.pending')} value={String(pendingCount)} color="warning" />
+                <StatCard icon={<Clock className="w-6 h-6" />} label={t('trainer.watch_hours')} value={`${totalWatchHours}h`} color="success" />
               </div>
 
               <div className="card p-6">
@@ -500,10 +526,9 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                       <div key={course.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
                         <span className="text-sm font-medium text-secondary-600 dark:text-white truncate">{course.title}</span>
                         <div className="flex items-center gap-4 text-xs text-secondary-400 dark:text-neutral-100">
-                          <span>{enrollCount} {t('course.students')}</span>
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-primary-400 text-primary-400" /> {rating.toFixed(1)}
-                          </span>
+                          <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {enrollCount}</span>
+                          <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-primary-400 text-primary-400" /> {rating.toFixed(1)}</span>
+                          <StatusBadge status={course.status} t={t} />
                         </div>
                       </div>
                     );
@@ -523,11 +548,13 @@ function StatusBadge({ status, t }: { status: string; t: (k: TKey) => string }) 
     published: 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400',
     pending_review: 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400',
     rejected: 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400',
+    draft: 'bg-gray-100 dark:bg-secondary-600 text-secondary-400',
   };
   const labels: Record<string, TKey> = {
     published: 'trainer.published',
     pending_review: 'trainer.pending',
     rejected: 'trainer.rejected',
+    draft: 'trainer.draft',
   };
   return (
     <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || styles.pending_review}`}>
@@ -536,11 +563,32 @@ function StatusBadge({ status, t }: { status: string; t: (k: TKey) => string }) 
   );
 }
 
-function StatCard({ icon, label, value, prefix }: { icon: React.ReactNode; label: string; value: number; prefix?: string }) {
+const COLOR_MAP: Record<string, { bg: string; text: string }> = {
+  primary: { bg: 'bg-primary-100 dark:bg-primary-600/20', text: 'text-primary-500' },
+  success: { bg: 'bg-success-100 dark:bg-success-600/20', text: 'text-success-500' },
+  accent: { bg: 'bg-accent-100 dark:bg-accent-600/20', text: 'text-accent-500' },
+  warning: { bg: 'bg-warning-100 dark:bg-warning-600/20', text: 'text-warning-500' },
+};
+
+function QuickStat({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color: string }) {
+  const c = COLOR_MAP[color] || COLOR_MAP.primary;
+  return (
+    <div className="card p-4 flex items-center gap-3">
+      <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center ${c.text} flex-shrink-0`}>{icon}</div>
+      <div className="min-w-0">
+        <div className="text-lg font-bold text-secondary-600 dark:text-white truncate">{value}</div>
+        <div className="text-xs text-secondary-400 dark:text-neutral-100 truncate">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
+  const c = COLOR_MAP[color] || COLOR_MAP.primary;
   return (
     <div className="card p-6">
-      <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">{icon}</div>
-      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{prefix}{value.toLocaleString()}</div>
+      <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center ${c.text} mb-3`}>{icon}</div>
+      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{value}</div>
       <div className="text-sm text-secondary-400 dark:text-neutral-100">{label}</div>
     </div>
   );

@@ -15,10 +15,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import CourseDetailPage from './pages/CourseDetailPage';
 import { AboutPage, ContactPage, TermsPage, PrivacyPage, FaqPage } from './pages/FooterPages';
 import type { Session } from '@supabase/supabase-js';
+import type { UserRole } from './types';
 
 function AppRoutes() {
   const { path } = useRouter();
-  const { session, loading } = useAuth();
+  const { session, profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -33,13 +34,13 @@ function AppRoutes() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="flex-1">{renderPage(path, session)}</div>
+      <div className="flex-1">{renderPage(path, session, profile?.role)}</div>
       {!isAuthPage && <Footer />}
     </div>
   );
 }
 
-function renderPage(path: string, session: Session | null) {
+function renderPage(path: string, session: Session | null, role: UserRole | undefined) {
   if (path.startsWith('/course/')) {
     const courseId = path.replace('/course/', '');
     return <CourseDetailPage courseId={courseId} />;
@@ -63,17 +64,32 @@ function renderPage(path: string, session: Session | null) {
     case '/faq':
       return <FaqPage />;
     case '/login':
-      return session ? <StudentDashboard /> : <LoginPage />;
+      return session ? <RoleDashboard role={role} /> : <LoginPage />;
     case '/signup':
-      return session ? <StudentDashboard /> : <SignupPage />;
+      return session ? <RoleDashboard role={role} /> : <SignupPage />;
     case '/dashboard':
-      return session ? <StudentDashboard /> : <LoginPage />;
+      return session ? <RoleDashboard role={role} /> : <LoginPage />;
     case '/trainer':
-      return session ? <TrainerDashboard /> : <LoginPage />;
+      if (!session) return <LoginPage />;
+      if (role !== 'trainer' && role !== 'super_admin') return <RoleDashboard role={role} />;
+      return <TrainerDashboard />;
     case '/super-admin':
-      return session ? <AdminDashboard /> : <LoginPage />;
+      if (!session) return <LoginPage />;
+      if (role !== 'super_admin') return <RoleDashboard role={role} />;
+      return <AdminDashboard />;
     default:
       return <LandingPage />;
+  }
+}
+
+function RoleDashboard({ role }: { role: UserRole | undefined }) {
+  switch (role) {
+    case 'trainer':
+      return <TrainerDashboard />;
+    case 'super_admin':
+      return <AdminDashboard />;
+    default:
+      return <StudentDashboard />;
   }
 }
 
