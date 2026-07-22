@@ -30,27 +30,33 @@ export default function Header() {
     setMobileOpen(false);
   };
 
+  const getDashboardPath = (role: string): string => {
+    if (role === 'super_admin') return '/super-admin';
+    if (role === 'trainer') return '/trainer';
+    return '/dashboard';
+  };
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-secondary-700/80 backdrop-blur-lg border-b border-gray-100 dark:border-secondary-500 transition-colors duration-300">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/85 dark:bg-secondary-700/85 backdrop-blur-lg border-b border-slate-100 dark:border-secondary-500 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <button onClick={() => handleNav('/')} className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-white font-heading font-bold text-lg">D</span>
+            <div className="w-9 h-9 rounded-[10px] bg-primary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span className="text-white font-heading font-extrabold text-lg">D</span>
             </div>
-            <span className="font-heading font-bold text-lg text-secondary-600 dark:text-white hidden sm:block">
+            <span className="font-heading font-extrabold text-lg text-secondary-600 dark:text-white hidden sm:block tracking-tight">
               Digital Skills <span className="text-primary-500">Africa</span>
             </span>
           </button>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop Nav — centered */}
+          <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             {navItems.map((item) => (
               <button
                 key={item.to}
                 onClick={() => handleNav(item.to)}
-                className={`nav-link ${path === item.to ? 'text-primary-500' : ''}`}
+                className={`nav-link text-sm ${path === item.to ? 'text-primary-500' : ''}`}
               >
                 {t(item.label)}
               </button>
@@ -62,11 +68,11 @@ export default function Header() {
             {/* Language selector */}
             <button
               onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-              className="flex items-center gap-1 px-2 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 transition-colors"
+              className="flex items-center gap-1 px-2 py-2 rounded-[10px] hover:bg-slate-50 dark:hover:bg-secondary-600 transition-colors"
               aria-label="Change language"
             >
-              <Globe className="w-5 h-5 text-secondary-600 dark:text-neutral-100" />
-              <span className="text-sm font-medium text-secondary-600 dark:text-neutral-100 uppercase">
+              <Globe className="w-5 h-5 text-slate-500" />
+              <span className="text-sm font-medium text-slate-500 uppercase">
                 {lang}
               </span>
             </button>
@@ -74,11 +80,11 @@ export default function Header() {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 transition-colors"
+              className="p-2 rounded-[10px] hover:bg-slate-50 dark:hover:bg-secondary-600 transition-colors"
               aria-label="Toggle theme"
             >
               {theme === 'light' ? (
-                <Moon className="w-5 h-5 text-secondary-600" />
+                <Moon className="w-5 h-5 text-slate-500" />
               ) : (
                 <Sun className="w-5 h-5 text-primary-400" />
               )}
@@ -114,7 +120,7 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-secondary-600 transition-colors"
+              className="md:hidden p-2 rounded-[10px] hover:bg-slate-50 dark:hover:bg-secondary-600 transition-colors"
               aria-label="Menu"
             >
               {mobileOpen ? (
@@ -128,7 +134,7 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 dark:border-secondary-500 animate-fade-in-down">
+          <div className="md:hidden py-4 border-t border-slate-100 dark:border-secondary-500 animate-fade-in-down">
             <nav className="flex flex-col gap-3">
               {navItems.map((item) => (
                 <button
@@ -167,10 +173,4 @@ export default function Header() {
       </div>
     </header>
   );
-}
-
-function getDashboardPath(role: string): string {
-  if (role === 'super_admin') return '/super-admin';
-  if (role === 'trainer') return '/trainer';
-  return '/dashboard';
 }

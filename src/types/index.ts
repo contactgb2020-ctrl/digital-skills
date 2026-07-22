@@ -27,6 +27,7 @@ export interface Profile {
   kyc_status: KycStatus;
   document_type: string | null;
   document_url: string | null;
+  chosen_category_ids: string[] | null;
   created_at: string;
 }
 

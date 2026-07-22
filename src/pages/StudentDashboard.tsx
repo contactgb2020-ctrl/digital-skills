@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Award, User, Lock, Play, CheckCircle, XCircle, TrendingUp, Clock, Star, BarChart3, ShieldCheck, FileCheck, Target, Flame, Calendar } from 'lucide-react';
+import { BookOpen, Award, User, Lock, Play, CheckCircle, XCircle, TrendingUp, Clock, Star, BarChart3, ShieldCheck, FileCheck, Target, Flame, Calendar, Layers, Plus } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
@@ -24,6 +24,8 @@ export default function StudentDashboard() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [chosenCategoryIds, setChosenCategoryIds] = useState<string[]>([]);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,6 +62,11 @@ export default function StudentDashboard() {
       const { data: catData } = await supabase.from('categories').select('id, name').order('name');
       if (catData) setCategories(catData as { id: string; name: string }[]);
 
+      // Load chosen categories from profile
+      if (profile?.chosen_category_ids) {
+        setChosenCategoryIds(profile.chosen_category_ids);
+      }
+
       setLoading(false);
     })();
   }, [session]);
@@ -68,6 +75,12 @@ export default function StudentDashboard() {
 
   const plan = subscription?.plan || 'starter';
   const isPremium = plan === 'premium' || plan === 'enterprise';
+  const isTrial = subscription?.status === 'trial';
+  const chosenCategories = categories.filter((c) => chosenCategoryIds.includes(c.id));
+  // During trial, only show courses from chosen categories
+  const visibleCourses = isTrial
+    ? allCourses.filter((c) => chosenCategoryIds.includes(c.category_id || ''))
+    : allCourses.filter((c) => chosenCategoryIds.length === 0 || chosenCategoryIds.includes(c.category_id || ''));
   const totalWatchMin = Math.round(watchSessions.reduce((s, w) => s + w.watched_seconds, 0) / 60);
   const completionRate = enrolledCourses.length > 0 ? Math.round(enrollments.reduce((s, e) => s + e.progress_pct, 0) / enrolledCourses.length) : 0;
   const avgQuizScore = quizAttempts.length > 0 ? Math.round(quizAttempts.reduce((s, q) => s + q.score, 0) / quizAttempts.length) : 0;

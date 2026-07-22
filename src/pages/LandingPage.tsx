@@ -60,15 +60,15 @@ export default function LandingPage() {
   return (
     <div className="pt-16">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-neutral-light via-white to-primary-50 dark:from-secondary-700 dark:via-secondary-700 dark:to-secondary-800 min-h-[90vh] flex items-center">
+      <section className="relative overflow-hidden hero-gradient dark:hero-gradient-dark min-h-[90vh] flex items-center">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 right-10 w-72 h-72 bg-primary-200 dark:bg-primary-600 rounded-full opacity-20 dark:opacity-10 blur-3xl animate-float"></div>
           <div className="absolute bottom-20 left-10 w-96 h-96 bg-secondary-200 dark:bg-secondary-500 rounded-full opacity-20 dark:opacity-10 blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 text-sm font-medium animate-fade-in-down">
+          <div className="space-y-6 text-center lg:text-left">
+            <div className="pill-badge animate-fade-in-down">
               <Sparkles className="w-4 h-4" />
               {t('section.categories')}
             </div>
@@ -78,14 +78,12 @@ export default function LandingPage() {
             <p className="text-lg text-secondary-400 dark:text-neutral-100 animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
               {t('hero.subtitle')}
             </p>
-            <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
+            <div className="flex flex-wrap items-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
               <button onClick={() => navigate('/signup')} className="btn-primary flex items-center gap-2 group">
                 {t('hero.cta')}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button onClick={() => navigate('/courses')} className="btn-outline">
-                {t('hero.cta.secondary')}
-              </button>
+              <span className="text-sm text-slate-500 dark:text-neutral-100">{t('pricing.trial')}</span>
             </div>
           </div>
 

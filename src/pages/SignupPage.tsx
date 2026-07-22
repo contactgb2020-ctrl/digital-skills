@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, User, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, MapPin, Plus, GraduationCap, BookOpen, Upload, FileCheck, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, MapPin, Plus, GraduationCap, BookOpen, Upload, FileCheck, ShieldCheck, Layers } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
@@ -44,10 +44,20 @@ export default function SignupPage() {
 
   const [selectedPlan, setSelectedPlan] = useState('starter');
   const [selectedRole, setSelectedRole] = useState<'student' | 'trainer'>('student');
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string; icon: string | null }[]>([]);
   const [documentType, setDocumentType] = useState('national_id');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [diplomaFile, setDiplomaFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Load categories on mount
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('categories').select('id, name, icon').order('name');
+      if (data) setCategories(data as { id: string; name: string; icon: string | null }[]);
+    })();
+  }, []);
 
   // Load countries on mount
   useEffect(() => {
@@ -135,7 +145,11 @@ export default function SignupPage() {
 
   const handleRoleNext = () => {
     setError(null);
-    setStep(3);
+    if (selectedRole === 'student') {
+      setStep(3);
+    } else {
+      setStep(3);
+    }
   };
 
   const handleLocationNext = () => {
@@ -199,6 +213,7 @@ export default function SignupPage() {
         kyc_status: docPath ? 'pending' : 'unverified',
         document_type: documentType || null,
         document_url: docPath || null,
+        chosen_category_ids: selectedRole === 'student' ? selectedCategoryIds : null,
       }).eq('id', user.id);
 
       // Insert KYC document if uploaded
@@ -245,7 +260,7 @@ export default function SignupPage() {
     navigate('/dashboard');
   };
 
-  const steps = [1, 2, 3, 4, 5, 6];
+  const steps = [1, 2, 3, 4, 5, 6, 7];
 
   return (
     <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-light to-primary-50 dark:from-secondary-700 dark:to-secondary-800 px-4 py-12">
@@ -264,7 +279,7 @@ export default function SignupPage() {
                 >
                   {step > s ? <CheckCircle className="w-5 h-5" /> : s}
                 </div>
-                {s < 6 && (
+                {s < 7 && (
                   <div className={`flex-1 h-1 mx-2 rounded ${step > s ? 'bg-primary-500' : 'bg-gray-200 dark:bg-secondary-500'}`} />
                 )}
               </div>
@@ -383,8 +398,58 @@ export default function SignupPage() {
             </div>
           )}
 
-          {/* Step 3: Location cascade */}
-          {step === 3 && (
+          {/* Step 3: Category selection (students only) */}
+          {step === 3 && selectedRole === 'student' && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center gap-2 mb-2">
+                <Layers className="w-5 h-5 text-primary-500" />
+                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">Choisissez vos catégories</h2>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-neutral-100 mb-4">Sélectionnez les catégories qui vous intéressent. Vous ne verrez que les cours de ces catégories.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.map((cat) => {
+                  const selected = selectedCategoryIds.includes(cat.id);
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategoryIds(
+                          selected
+                            ? selectedCategoryIds.filter((id) => id !== cat.id)
+                            : [...selectedCategoryIds, cat.id]
+                        );
+                      }}
+                      className={`p-3 rounded-xl border-2 text-left transition-all ${
+                        selected ? 'border-primary-500 bg-primary-50 dark:bg-primary-600/20' : 'border-slate-100 dark:border-secondary-500 hover:border-primary-300'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm text-secondary-600 dark:text-white">{cat.name}</div>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedCategoryIds.length === 0 && (
+                <p className="text-xs text-alert-500">Veuillez sélectionner au moins une catégorie.</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setStep(2)} className="btn-outline flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5" /> {t('onboarding.back')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { if (selectedCategoryIds.length > 0) setStep(4); }}
+                  disabled={selectedCategoryIds.length === 0}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {t('onboarding.next')} <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Location cascade (trainers skip category) */}
+          {step === 3 && selectedRole === 'trainer' && (
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-5 h-5 text-primary-500" />
