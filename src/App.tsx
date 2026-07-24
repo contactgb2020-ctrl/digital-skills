@@ -13,6 +13,9 @@ import StudentDashboard from './pages/StudentDashboard';
 import TrainerDashboard from './pages/TrainerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CourseDetailPage from './pages/CourseDetailPage';
+import CareerPathPage from './pages/CareerPathPage';
+import PortfolioPage from './pages/PortfolioPage';
+import EmployerPortalPage from './pages/EmployerPortalPage';
 import { AboutPage, ContactPage, TermsPage, PrivacyPage, FaqPage } from './pages/FooterPages';
 import type { Session } from '@supabase/supabase-js';
 import type { UserRole } from './types';
@@ -23,7 +26,7 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-light dark:bg-secondary-700">
+      <div className="min-h-screen flex items-center justify-center bg-sage-50 dark:bg-secondary-700">
         <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -46,13 +49,27 @@ function renderPage(path: string, session: Session | null, role: UserRole | unde
     return <CourseDetailPage courseId={courseId} />;
   }
 
+  if (path.startsWith('/career-path/')) {
+    const slug = path.replace('/career-path/', '');
+    return <CareerPathPage pathSlug={slug} />;
+  }
+
+  if (path.startsWith('/portfolio/')) {
+    const userId = path.replace('/portfolio/', '');
+    return <PortfolioPage userId={userId} />;
+  }
+
   switch (path) {
     case '/':
       return <LandingPage />;
+    case '/career-paths':
+      return <CoursesPage />;
     case '/courses':
       return <CoursesPage />;
     case '/pricing':
       return <PricingPage />;
+    case '/employer':
+      return <EmployerPortalPage />;
     case '/about':
       return <AboutPage />;
     case '/contact':

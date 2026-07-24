@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Users, BookOpen, MapPin, BarChart3, TrendingUp, CheckCircle, XCircle, Search, Star, Trash2, CreditCard, DollarSign, Shield, AlertTriangle,
   FileCheck, FolderPlus, Wallet, UserCog, Settings, Clock,
+  Award, Building2, Tag, Download, LifeBuoy, PieChart,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -38,7 +39,7 @@ export default function AdminDashboard() {
 }
 
 function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string }) {
-  const [tab, setTab] = useState<'overview' | 'users' | 'courses' | 'locations' | 'subscriptions' | 'kyc' | 'categories' | 'commissions' | 'roles' | 'plans'>('overview');
+  const [tab, setTab] = useState<'overview' | 'users' | 'courses' | 'locations' | 'subscriptions' | 'kyc' | 'categories' | 'commissions' | 'roles' | 'plans' | 'revenue' | 'certificates' | 'employers' | 'coupons' | 'reports' | 'support' | 'settings'>('overview');
   const [users, setUsers] = useState<Profile[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [pendingCourses, setPendingCourses] = useState<Course[]>([]);
@@ -73,6 +74,28 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [newRoleName, setNewRoleName] = useState('');
   const [assignRole, setAssignRole] = useState({ userId: '', roleId: '' });
+
+  // Revenue state
+  const [revenueByPlan, setRevenueByPlan] = useState<Record<string, number>>({});
+
+  // Certificates state
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [certHolderNames, setCertHolderNames] = useState<Record<string, string>>({});
+  const [certCourseTitles, setCertCourseTitles] = useState<Record<string, string>>({});
+
+  // Employers state
+  const [employers, setEmployers] = useState<any[]>([]);
+
+  // Coupons state
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [newCoupon, setNewCoupon] = useState({ code: '', discount_percent: 10, max_uses: 100 });
+
+  // Support tickets state
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [ticketUserNames, setTicketUserNames] = useState<Record<string, string>>({});
+
+  // Settings state
+  const [platformSettings, setPlatformSettings] = useState({ platform_name: 'Skillz', default_language: 'fr', support_email: 'support@skillz.com' });
 
   useEffect(() => {
     (async () => {
@@ -146,6 +169,65 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
       const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
       if (staffData) setStaffMembers(staffData as StaffMember[]);
+
+      // Revenue by plan (from completed payments joined with subscriptions)
+      const planRevenue: Record<string, number> = { starter: 0, premium: 0, enterprise: 0 };
+      (subData as Subscription[] || []).forEach((s) => {
+        const planPayments = (payData as Payment[] || []).filter((p) => p.status === 'completed');
+        // approximate: distribute total completed payments across plans proportionally
+        planRevenue[s.plan] = (planRevenue[s.plan] || 0) + 0;
+      });
+      // Simple: sum completed payments per plan via subscription lookup
+      const subById: Record<string, Subscription> = {};
+      (subData as Subscription[] || []).forEach((s) => { subById[s.id] = s; });
+      (payData as Payment[] || []).filter((p) => p.status === 'completed').forEach((p) => {
+        const sub = subById[(p as any).subscription_id];
+        if (sub && sub.plan) planRevenue[sub.plan] = (planRevenue[sub.plan] || 0) + Number(p.amount);
+      });
+      setRevenueByPlan(planRevenue);
+
+      // Certificates
+      const { data: certData } = await supabase.from('certificates').select('*').order('created_at', { ascending: false }).limit(50);
+      if (certData) {
+        setCertificates(certData);
+        const cUserIds = [...new Set((certData as any[]).map((c) => c.user_id))];
+        const cCourseIds = [...new Set((certData as any[]).map((c) => c.course_id))];
+        const [{ data: cProfiles }, { data: cCourses }] = await Promise.all([
+          supabase.from('profiles').select('id, nom, email').in('id', cUserIds),
+          supabase.from('courses').select('id, title').in('id', cCourseIds),
+        ]);
+        if (cProfiles) {
+          const map: Record<string, string> = {};
+          (cProfiles as any[]).forEach((p) => { map[p.id] = p.nom || p.email; });
+          setCertHolderNames(map);
+        }
+        if (cCourses) {
+          const map: Record<string, string> = {};
+          (cCourses as any[]).forEach((c) => { map[c.id] = c.title; });
+          setCertCourseTitles(map);
+        }
+      }
+
+      // Employers
+      const { data: empData } = await supabase.from('employer_profiles').select('*').order('created_at', { ascending: false });
+      if (empData) setEmployers(empData as any[]);
+
+      // Coupons
+      const { data: couponData } = await supabase.from('coupons').select('*').order('created_at', { ascending: false });
+      if (couponData) setCoupons(couponData as any[]);
+
+      // Support tickets
+      const { data: ticketData } = await supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(50);
+      if (ticketData) {
+        setSupportTickets(ticketData as any[]);
+        const tUserIds = [...new Set((ticketData as any[]).map((t) => t.user_id))];
+        const { data: tProfiles } = await supabase.from('profiles').select('id, nom, email').in('id', tUserIds);
+        if (tProfiles) {
+          const map: Record<string, string> = {};
+          (tProfiles as any[]).forEach((p) => { map[p.id] = p.nom || p.email; });
+          setTicketUserNames(map);
+        }
+      }
 
       setLoading(false);
     })();
@@ -306,6 +388,13 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
     { icon: <UserCog className="w-5 h-5" />, labelKey: 'admin.tab_roles' as TKey, active: tab === 'roles', onClick: () => setTab('roles') },
     { icon: <MapPin className="w-5 h-5" />, labelKey: 'admin.locations' as TKey, active: tab === 'locations', onClick: () => setTab('locations') },
     { icon: <CreditCard className="w-5 h-5" />, labelKey: 'admin.tab_subscriptions' as TKey, active: tab === 'subscriptions', onClick: () => setTab('subscriptions') },
+    { icon: <DollarSign className="w-5 h-5" />, labelKey: 'admin.tab_revenue' as TKey, active: tab === 'revenue', onClick: () => setTab('revenue') },
+    { icon: <Award className="w-5 h-5" />, labelKey: 'admin.tab_certificates' as TKey, active: tab === 'certificates', onClick: () => setTab('certificates') },
+    { icon: <Building2 className="w-5 h-5" />, labelKey: 'admin.tab_employers' as TKey, active: tab === 'employers', onClick: () => setTab('employers') },
+    { icon: <Tag className="w-5 h-5" />, labelKey: 'admin.tab_coupons' as TKey, active: tab === 'coupons', onClick: () => setTab('coupons') },
+    { icon: <Download className="w-5 h-5" />, labelKey: 'admin.tab_reports' as TKey, active: tab === 'reports', onClick: () => setTab('reports') },
+    { icon: <LifeBuoy className="w-5 h-5" />, labelKey: 'admin.tab_support' as TKey, active: tab === 'support', onClick: () => setTab('support') },
+    { icon: <Settings className="w-5 h-5" />, labelKey: 'admin.tab_settings' as TKey, active: tab === 'settings', onClick: () => setTab('settings') },
   ];
 
   return (
@@ -794,6 +883,259 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* REVENUE */}
+          {tab === 'revenue' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard icon={<DollarSign className="w-6 h-6" />} label={t('admin.revenue_total')} value={totalRevenue} prefix="$" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Starter" value={revenueByPlan['starter'] || 0} prefix="$" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Premium" value={revenueByPlan['premium'] || 0} prefix="$" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Enterprise" value={revenueByPlan['enterprise'] || 0} prefix="$" />
+              </div>
+              <div className="card p-6">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                  <PieChart className="w-5 h-5 text-primary-500" /> Subscription Revenue Breakdown
+                </h3>
+                <div className="space-y-3">
+                  {(['starter', 'premium', 'enterprise'] as const).map((plan) => {
+                    const amt = revenueByPlan[plan] || 0;
+                    const pct = totalRevenue > 0 ? (amt / totalRevenue) * 100 : 0;
+                    return (
+                      <div key={plan}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-secondary-600 dark:text-white capitalize">{plan}</span>
+                          <span className="text-secondary-400 dark:text-neutral-100">${amt.toFixed(2)}</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-secondary-600">
+                          <div className="h-full rounded-full bg-primary-500 transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CERTIFICATES */}
+          {tab === 'certificates' && (
+            <div className="space-y-4">
+              <div className="card overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-secondary-600 dark:bg-secondary-800 text-white">
+                      <tr>
+                        <th className="text-left p-4 text-sm font-medium">Holder</th>
+                        <th className="text-left p-4 text-sm font-medium">Course</th>
+                        <th className="text-left p-4 text-sm font-medium">Certificate #</th>
+                        <th className="text-left p-4 text-sm font-medium">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {certificates.length === 0 ? (
+                        <tr><td colSpan={4} className="p-8 text-center text-secondary-400 dark:text-neutral-100">No certificates</td></tr>
+                      ) : certificates.map((cert) => (
+                        <tr key={cert.id} className="border-b border-gray-100 dark:border-secondary-500">
+                          <td className="p-4 text-sm text-secondary-600 dark:text-white">{certHolderNames[cert.user_id] || '—'}</td>
+                          <td className="p-4 text-sm text-secondary-400 dark:text-neutral-100">{certCourseTitles[cert.course_id] || '—'}</td>
+                          <td className="p-4 text-sm text-secondary-400 dark:text-neutral-100">{cert.certificate_number || '—'}</td>
+                          <td className="p-4 text-sm text-secondary-400 dark:text-neutral-100">{new Date(cert.created_at).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* EMPLOYERS */}
+          {tab === 'employers' && (
+            <div className="space-y-4">
+              {employers.length === 0 ? (
+                <div className="card p-8 text-center">
+                  <Building2 className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
+                  <p className="text-secondary-400 dark:text-neutral-100">No employer profiles</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {employers.map((emp) => (
+                    <div key={emp.id} className="card p-5">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-secondary-600 dark:text-white">{emp.company_name || '—'}</h4>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${emp.is_verified ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                          {emp.is_verified ? 'Verified' : 'Unverified'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-secondary-400 dark:text-neutral-100">{emp.industry || '—'}</p>
+                      {emp.website && <a href={emp.website} target="_blank" rel="noreferrer" className="text-xs text-primary-500 hover:underline">{emp.website}</a>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* COUPONS */}
+          {tab === 'coupons' && (
+            <div className="space-y-6">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const { data } = await supabase.from('coupons').insert({ code: newCoupon.code.toUpperCase(), discount_percent: newCoupon.discount_percent, max_uses: newCoupon.max_uses, is_active: true, created_by: profile.id }).select().single();
+                if (data) { setCoupons([data, ...coupons]); setNewCoupon({ code: '', discount_percent: 10, max_uses: 100 }); }
+              }} className="card p-6 flex gap-3 items-end flex-wrap max-w-2xl">
+                <div className="flex-1 min-w-[140px]">
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Code</label>
+                  <input type="text" required value={newCoupon.code} onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })} className="input-field" placeholder="SUMMER20" />
+                </div>
+                <div className="w-28">
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Discount %</label>
+                  <input type="number" min={1} max={100} required value={newCoupon.discount_percent} onChange={(e) => setNewCoupon({ ...newCoupon, discount_percent: parseInt(e.target.value) || 0 })} className="input-field" />
+                </div>
+                <div className="w-28">
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Max uses</label>
+                  <input type="number" min={1} required value={newCoupon.max_uses} onChange={(e) => setNewCoupon({ ...newCoupon, max_uses: parseInt(e.target.value) || 0 })} className="input-field" />
+                </div>
+                <button type="submit" className="btn-primary flex items-center gap-2"><Tag className="w-5 h-5" /> Create Coupon</button>
+              </form>
+
+              <div className="card overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-secondary-600 dark:bg-secondary-800 text-white">
+                      <tr>
+                        <th className="text-left p-4 text-sm font-medium">Code</th>
+                        <th className="text-left p-4 text-sm font-medium">Discount</th>
+                        <th className="text-left p-4 text-sm font-medium">Uses</th>
+                        <th className="text-left p-4 text-sm font-medium">Expires</th>
+                        <th className="text-left p-4 text-sm font-medium">Status</th>
+                        <th className="text-left p-4 text-sm font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coupons.length === 0 ? (
+                        <tr><td colSpan={6} className="p-8 text-center text-secondary-400 dark:text-neutral-100">No coupons</td></tr>
+                      ) : coupons.map((c) => (
+                        <tr key={c.id} className="border-b border-gray-100 dark:border-secondary-500">
+                          <td className="p-4 text-sm font-mono text-secondary-600 dark:text-white">{c.code}</td>
+                          <td className="p-4 text-sm text-secondary-400 dark:text-neutral-100">{c.discount_percent}%</td>
+                          <td className="p-4 text-sm text-secondary-400 dark:text-neutral-100">{c.uses}/{c.max_uses}</td>
+                          <td className="p-4 text-sm text-secondary-400 dark:text-neutral-100">{c.expires_at ? new Date(c.expires_at).toLocaleDateString() : '—'}</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${c.is_active ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                              {c.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <button onClick={async () => { await supabase.from('coupons').update({ is_active: !c.is_active }).eq('id', c.id); setCoupons(coupons.map((x) => x.id === c.id ? { ...x, is_active: !x.is_active } : x)); }} className="text-xs text-primary-500 hover:underline">
+                              {c.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* REPORTS */}
+          {tab === 'reports' && (
+            <div className="space-y-6">
+              <div className="card p-6">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                  <Download className="w-5 h-5 text-primary-500" /> Export Data
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  <button onClick={() => {
+                    const rows = users.map((u) => ({ id: u.id, email: u.email, nom: u.nom, role: u.role, kyc_status: u.kyc_status, created_at: u.created_at }));
+                    const csv = [Object.keys(rows[0] || {}).join(','), ...rows.map((r) => Object.values(r).join(','))].join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'users.csv'; a.click(); URL.revokeObjectURL(url);
+                  }} className="btn-outline flex items-center gap-2"><Download className="w-4 h-4" /> Users CSV</button>
+                  <button onClick={() => {
+                    const rows = allCourses.map((c) => ({ id: c.id, title: c.title, category: c.category, level: c.level, status: c.status, created_at: c.created_at }));
+                    const csv = [Object.keys(rows[0] || {}).join(','), ...rows.map((r) => Object.values(r).join(','))].join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'courses.csv'; a.click(); URL.revokeObjectURL(url);
+                  }} className="btn-outline flex items-center gap-2"><Download className="w-4 h-4" /> Courses CSV</button>
+                  <button onClick={() => {
+                    const rows = subscriptions.map((s) => ({ id: s.id, plan: s.plan, status: s.status, start_date: s.start_date, end_date: s.end_date }));
+                    const csv = [Object.keys(rows[0] || {}).join(','), ...rows.map((r) => Object.values(r).join(','))].join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'subscriptions.csv'; a.click(); URL.revokeObjectURL(url);
+                  }} className="btn-outline flex items-center gap-2"><Download className="w-4 h-4" /> Subscriptions CSV</button>
+                  <button onClick={() => {
+                    const rows = payments.map((p) => ({ id: p.id, amount: p.amount, status: p.status, created_at: p.created_at }));
+                    const csv = [Object.keys(rows[0] || {}).join(','), ...rows.map((r) => Object.values(r).join(','))].join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'payments.csv'; a.click(); URL.revokeObjectURL(url);
+                  }} className="btn-outline flex items-center gap-2"><Download className="w-4 h-4" /> Payments CSV</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SUPPORT */}
+          {tab === 'support' && (
+            <div className="space-y-4">
+              {supportTickets.length === 0 ? (
+                <div className="card p-8 text-center">
+                  <LifeBuoy className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
+                  <p className="text-secondary-400 dark:text-neutral-100">No support tickets</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {supportTickets.map((ticket) => (
+                    <div key={ticket.id} className="card p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h4 className="font-semibold text-secondary-600 dark:text-white">{ticket.subject}</h4>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ticket.status === 'open' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : ticket.status === 'resolved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                              {ticket.status}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ticket.priority === 'high' ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : ticket.priority === 'medium' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                              {ticket.priority}
+                            </span>
+                          </div>
+                          <p className="text-xs text-secondary-400 dark:text-neutral-100">{ticketUserNames[ticket.user_id] || '—'} · {new Date(ticket.created_at).toLocaleDateString()}</p>
+                          {ticket.description && <p className="text-sm text-secondary-600 dark:text-white mt-2">{ticket.description}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SETTINGS */}
+          {tab === 'settings' && (
+            <div className="space-y-6">
+              <div className="card p-6 max-w-lg">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-primary-500" /> Platform Settings
+                </h3>
+                <form onSubmit={(e) => { e.preventDefault(); alert('Settings saved (demo)'); }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Platform Name</label>
+                    <input type="text" value={platformSettings.platform_name} onChange={(e) => setPlatformSettings({ ...platformSettings, platform_name: e.target.value })} className="input-field" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Default Language</label>
+                    <select value={platformSettings.default_language} onChange={(e) => setPlatformSettings({ ...platformSettings, default_language: e.target.value })} className="input-field">
+                      <option value="fr">Français</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Support Email</label>
+                    <input type="email" value={platformSettings.support_email} onChange={(e) => setPlatformSettings({ ...platformSettings, support_email: e.target.value })} className="input-field" />
+                  </div>
+                  <button type="submit" className="btn-primary">Save Settings</button>
+                </form>
               </div>
             </div>
           )}

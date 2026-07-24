@@ -24,7 +24,7 @@ export default function Footer() {
                 <span className="text-white font-heading font-bold text-lg">D</span>
               </div>
               <span className="font-heading font-bold text-lg">
-                Digital Skills <span className="text-primary-400">Africa</span>
+                Skills <span className="text-primary-400">Academy</span>
               </span>
             </div>
             <p className="text-secondary-200 text-sm mb-3">{t('footer.tagline')}</p>
@@ -38,10 +38,10 @@ export default function Footer() {
           <div>
             <h4 className="font-heading font-semibold mb-4">{t('nav.courses')}</h4>
             <ul className="space-y-2 text-sm text-secondary-200">
-              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/courses')}>{t('category.web')}</li>
-              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/courses')}>{t('category.marketing')}</li>
-              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/courses')}>{t('category.beauty')}</li>
-              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/courses')}>{t('category.data')}</li>
+              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/career-paths')}>{t('category.technology')}</li>
+              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/career-paths')}>{t('category.business')}</li>
+              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/career-paths')}>{t('category.beauty')}</li>
+              <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/career-paths')}>{t('category.creative')}</li>
             </ul>
           </div>
 

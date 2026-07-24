@@ -15,7 +15,7 @@ export default function Header() {
 
   const navItems: { label: TranslationKey; to: string }[] = [
     { label: 'nav.home', to: '/' },
-    { label: 'nav.courses', to: '/courses' },
+    { label: 'nav.courses', to: '/career-paths' },
     { label: 'nav.pricing', to: '/pricing' },
   ];
 
@@ -46,7 +46,7 @@ export default function Header() {
               <span className="text-white font-heading font-extrabold text-lg">D</span>
             </div>
             <span className="font-heading font-extrabold text-lg text-secondary-600 dark:text-white hidden sm:block tracking-tight">
-              Digital Skills <span className="text-primary-500">Africa</span>
+              Skills <span className="text-primary-500">Academy</span>
             </span>
           </button>
 

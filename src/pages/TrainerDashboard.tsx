@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Award, Layers, Play } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Award, Layers, Play, MessageSquare, Megaphone, Building2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -33,7 +33,7 @@ export default function TrainerDashboard() {
 }
 
 function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnType<typeof useAuth>['profile']>; session: ReturnType<typeof useAuth>['session']; t: (k: TKey) => string }) {
-  const [tab, setTab] = useState<'courses' | 'create' | 'stats' | 'earnings'>('courses');
+  const [tab, setTab] = useState<'courses' | 'create' | 'stats' | 'earnings' | 'messages' | 'announcements'>('courses');
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [earnings, setEarnings] = useState<TrainerEarning[]>([]);
@@ -55,6 +55,14 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
   const [quizForm, setQuizForm] = useState({ lessonId: '', question: '', answers: '', correct_answer: 0, explanation: '' });
   const [showQuizForm, setShowQuizForm] = useState(false);
+
+  // Analytics overview state
+  const [analytics, setAnalytics] = useState({ studentCount: 0, revenue: 0, completionRate: 0, avgRating: 0 });
+
+  // Announcements state
+  const [announcements, setAnnouncements] = useState<{ id: string; title: string; content: string; created_at: string }[]>([]);
+  const [annForm, setAnnForm] = useState({ title: '', content: '' });
+  const [annPosting, setAnnPosting] = useState(false);
 
   const loadCourses = useCallback(async () => {
     if (!session?.user) return;
@@ -87,6 +95,50 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   }, [session]);
 
   useEffect(() => { loadCourses(); }, [loadCourses]);
+
+  // Load analytics overview: enrollment count, earnings sum, avg completion, avg rating
+  const loadAnalytics = useCallback(async () => {
+    if (!session?.user) return;
+    const { data: coursesData } = await supabase.from('courses').select('id').eq('created_by', session.user.id);
+    const courseIds = (coursesData || []).map((c) => c.id);
+    if (courseIds.length === 0) { setAnalytics({ studentCount: 0, revenue: 0, completionRate: 0, avgRating: 0 }); return; }
+
+    const { count: studentCount } = await supabase.from('enrollments').select('*', { count: 'exact', head: true }).in('course_id', courseIds);
+
+    const { data: enrollRows } = await supabase.from('enrollments').select('progress_pct').in('course_id', courseIds);
+    const completionRate = enrollRows && enrollRows.length > 0 ? enrollRows.reduce((s, e) => s + Number(e.progress_pct || 0), 0) / enrollRows.length : 0;
+
+    const { data: earnRows } = await supabase.from('trainer_earnings').select('amount_due').eq('trainer_id', session.user.id);
+    const revenue = (earnRows || []).reduce((s, e) => s + Number(e.amount_due || 0), 0);
+
+    const { data: reviewRows } = await supabase.from('reviews').select('rating').in('course_id', courseIds);
+    const avgRating = reviewRows && reviewRows.length > 0 ? reviewRows.reduce((s, r) => s + Number(r.rating || 0), 0) / reviewRows.length : 0;
+
+    setAnalytics({ studentCount: studentCount || 0, revenue, completionRate, avgRating });
+  }, [session]);
+  useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
+
+  // Load announcements for this trainer
+  const loadAnnouncements = useCallback(async () => {
+    if (!session?.user) return;
+    const { data } = await supabase.from('announcements').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
+    if (data) setAnnouncements(data as { id: string; title: string; content: string; created_at: string }[]);
+  }, [session]);
+  useEffect(() => { loadAnnouncements(); }, [loadAnnouncements]);
+
+  const handlePostAnnouncement = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session?.user || !annForm.title.trim() || !annForm.content.trim()) return;
+    setAnnPosting(true);
+    const { data } = await supabase.from('announcements').insert({
+      trainer_id: session.user.id, title: annForm.title.trim(), content: annForm.content.trim(),
+    }).select().single();
+    setAnnPosting(false);
+    if (data) {
+      setAnnouncements([data as { id: string; title: string; content: string; created_at: string }, ...announcements]);
+      setAnnForm({ title: '', content: '' });
+    }
+  }, [session, annForm, announcements]);
 
   const handleCreate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,7 +249,10 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
     { icon: <BookOpen className="w-5 h-5" />, labelKey: 'trainer.my_courses' as TKey, active: tab === 'courses', onClick: () => setTab('courses') },
     { icon: <Plus className="w-5 h-5" />, labelKey: 'trainer.create_course' as TKey, active: tab === 'create', onClick: () => { setTab('create'); if (!editingCourse) setShowForm(true); } },
     { icon: <Wallet className="w-5 h-5" />, labelKey: 'trainer.earnings' as TKey, active: tab === 'earnings', onClick: () => setTab('earnings') },
+    { icon: <MessageSquare className="w-5 h-5" />, labelKey: 'trainer.messages' as TKey, active: tab === 'messages', onClick: () => setTab('messages') },
+    { icon: <Megaphone className="w-5 h-5" />, labelKey: 'trainer.announcements' as TKey, active: tab === 'announcements', onClick: () => setTab('announcements') },
     { icon: <BarChart3 className="w-5 h-5" />, labelKey: 'trainer.stats' as TKey, active: tab === 'stats', onClick: () => setTab('stats') },
+    { icon: <Building2 className="w-5 h-5" />, labelKey: 'nav.employer' as TKey, active: false, onClick: () => { window.location.hash = '/employer'; } },
   ];
 
   const totalStudents = Object.values(courseEnrollments).reduce((s, n) => s + n, 0);
@@ -223,7 +278,20 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
         <QuickStat icon={<BookOpen className="w-5 h-5" />} label={t('trainer.my_courses')} value={courses.length} color="primary" />
         <QuickStat icon={<Users className="w-5 h-5" />} label={t('trainer.total_students')} value={totalStudents} color="success" />
         <QuickStat icon={<Star className="w-5 h-5" />} label={t('trainer.avg_rating')} value={Number(avgRating.toFixed(1))} color="accent" />
-        <QuickStat icon={<Wallet className="w-5 h-5" />} label={t('trainer.amount_due')} value={`$${pendingPayment.toFixed(2)}`} color="warning" />
+        <QuickStat icon={<Wallet className="w-5 h-5" />} label={t('trainer.amount_due')} value={`${pendingPayment.toFixed(2)}`} color="warning" />
+      </div>
+
+      {/* Modern analytics overview */}
+      <div className="mb-8">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-secondary-400 dark:text-neutral-100 mb-3 flex items-center gap-2">
+          <BarChart3 className="w-4 h-4" /> {t('trainer.analytics')}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard icon={<Users className="w-6 h-6" />} label={t('trainer.student_count')} value={String(analytics.studentCount)} color="primary" />
+          <StatCard icon={<DollarSign className="w-6 h-6" />} label={t('trainer.revenue')} value={`${analytics.revenue.toFixed(2)}`} color="success" />
+          <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.completion_rate')} value={`${analytics.completionRate.toFixed(0)}%`} color="accent" />
+          <StatCard icon={<Star className="w-6 h-6" />} label={t('trainer.ratings')} value={analytics.avgRating.toFixed(1)} color="warning" />
+        </div>
       </div>
 
       {loading ? (
@@ -534,6 +602,61 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Messages */}
+          {tab === 'messages' && (
+            <div className="card p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
+                <MessageSquare className="w-10 h-10 text-primary-500" />
+              </div>
+              <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('trainer.messages')}</p>
+              <p className="text-sm text-secondary-400 dark:text-neutral-100">No messages</p>
+            </div>
+          )}
+
+          {/* Announcements */}
+          {tab === 'announcements' && (
+            <div className="space-y-6">
+              <form onSubmit={handlePostAnnouncement} className="card p-6 max-w-2xl space-y-4 animate-fade-in">
+                <h2 className="text-xl font-bold text-secondary-600 dark:text-white flex items-center gap-2">
+                  <Megaphone className="w-5 h-5" /> {t('trainer.announcements')}
+                </h2>
+                <div>
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.title')}</label>
+                  <input type="text" required value={annForm.title} onChange={(e) => setAnnForm({ ...annForm, title: e.target.value })} className="input-field" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.description')}</label>
+                  <textarea required rows={4} value={annForm.content} onChange={(e) => setAnnForm({ ...annForm, content: e.target.value })} className="input-field" />
+                </div>
+                <button type="submit" disabled={annPosting} className="btn-primary disabled:opacity-60 flex items-center gap-2">
+                  <Send className="w-4 h-4" /> {t('trainer.save')}
+                </button>
+              </form>
+
+              <div className="card p-6">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.announcements')}</h3>
+                {announcements.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Megaphone className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
+                    <p className="text-sm text-secondary-400 dark:text-neutral-100">No announcements</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {announcements.map((a) => (
+                      <div key={a.id} className="p-4 rounded-lg bg-gray-50 dark:bg-secondary-600">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium text-secondary-600 dark:text-white">{a.title}</h4>
+                          <span className="text-xs text-secondary-400 dark:text-neutral-100">{new Date(a.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-sm text-secondary-400 dark:text-neutral-100 whitespace-pre-wrap">{a.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
