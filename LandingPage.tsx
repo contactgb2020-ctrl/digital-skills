@@ -1,0 +1,545 @@
+import { useState, useEffect, useCallback } from 'react';
+import {
+  User,
+  MapPin,
+  Github,
+  Linkedin,
+  Twitter,
+  Globe,
+  Download,
+  ExternalLink,
+  Award,
+  Briefcase,
+  Folder,
+  Star,
+  ArrowLeft,
+} from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useRouter } from '../router/Router';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import type { Portfolio, PortfolioProject, ExperienceEntry } from '../types';
+
+interface ProfileName {
+  nom: string;
+}
+
+export default function PortfolioPage({ userId }: { userId: string }) {
+  const { t } = useLanguage();
+  const { navigate } = useRouter();
+  const { session } = useAuth();
+
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [projects, setProjects] = useState<PortfolioProject[]>([]);
+  const [profileName, setProfileName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [notPublic, setNotPublic] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      setLoading(true);
+      setNotFound(false);
+      setNotPublic(false);
+
+      // Load portfolio by user_id
+      const { data: portfolioData, error: portfolioError } = await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!mounted) return;
+
+      if (portfolioError) {
+        console.error('Error fetching portfolio:', portfolioError);
+        setLoading(false);
+        setNotFound(true);
+        return;
+      }
+
+      if (!portfolioData) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
+      const portfolioRow = portfolioData as Portfolio;
+
+      // Check visibility: public OR the owner viewing their own portfolio
+      const isOwner = session?.user?.id === userId;
+      if (!portfolioRow.is_public && !isOwner) {
+        setNotPublic(true);
+        setLoading(false);
+        return;
+      }
+
+      setPortfolio(portfolioRow);
+
+      // Load profile name in parallel with projects
+      const [profileRes, projectsRes] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('nom')
+          .eq('id', userId)
+          .maybeSingle(),
+        supabase
+          .from('portfolio_projects')
+          .select('*')
+          .eq('portfolio_id', portfolioRow.id)
+          .order('created_at', { ascending: false }),
+      ]);
+
+      if (!mounted) return;
+
+      if (profileRes.data) {
+        setProfileName((profileRes.data as ProfileName).nom || '');
+      }
+      if (projectsRes.data) {
+        setProjects(projectsRes.data as PortfolioProject[]);
+      }
+
+      setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [userId, session]);
+
+  const handleDownloadCV = useCallback(() => {
+    if (!portfolio) return;
+
+    const lines: string[] = [];
+    lines.push('========================================');
+    lines.push(`  ${profileName || 'Portfolio'}`);
+    lines.push('========================================');
+    lines.push('');
+    if (portfolio.headline) {
+      lines.push(`Headline: ${portfolio.headline}`);
+      lines.push('');
+    }
+    if (portfolio.bio) {
+      lines.push('--- About ---');
+      lines.push(portfolio.bio);
+      lines.push('');
+    }
+    if (portfolio.skills && portfolio.skills.length > 0) {
+      lines.push('--- Skills ---');
+      lines.push(portfolio.skills.join(', '));
+      lines.push('');
+    }
+    if (portfolio.experience && portfolio.experience.length > 0) {
+      lines.push('--- Experience ---');
+      portfolio.experience.forEach((exp: ExperienceEntry, i: number) => {
+        lines.push(
+          `${i + 1}. ${exp.title}${exp.company ? ' @ ' + exp.company : ''}`
+        );
+        const dateRange = exp.end
+          ? `${exp.start} - ${exp.end}`
+          : `${exp.start} - Present`;
+        lines.push(`   ${dateRange}`);
+        if (exp.description) lines.push(`   ${exp.description}`);
+        lines.push('');
+      });
+    }
+    if (projects.length > 0) {
+      lines.push('--- Projects ---');
+      projects.forEach((proj, i) => {
+        lines.push(`${i + 1}. ${proj.title}`);
+        if (proj.description) lines.push(`   ${proj.description}`);
+        if (proj.tags && proj.tags.length > 0)
+          lines.push(`   Tags: ${proj.tags.join(', ')}`);
+        if (proj.project_url) lines.push(`   URL: ${proj.project_url}`);
+        lines.push('');
+      });
+    }
+    if (portfolio.social_links) {
+      const sl = portfolio.social_links;
+      const entries = Object.entries(sl).filter(([, v]) => !!v);
+      if (entries.length > 0) {
+        lines.push('--- Social Links ---');
+        entries.forEach(([key, val]) => {
+          lines.push(`${key}: ${val}`);
+        });
+        lines.push('');
+      }
+    }
+    lines.push('========================================');
+    lines.push(`Generated by Skills Academy`);
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(profileName || 'portfolio').replace(/\s+/g, '_')}_CV.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [portfolio, profileName, projects]);
+
+  // ---- Loading skeleton ----
+  if (loading) {
+    return (
+      <div className="pt-16 min-h-screen bg-sage-50 dark:bg-secondary-700">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header skeleton */}
+          <div className="card p-8 mb-6 animate-pulse">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <div className="w-28 h-28 rounded-full bg-slate-200 dark:bg-secondary-600" />
+              <div className="flex-1 space-y-3 w-full">
+                <div className="h-7 bg-slate-200 dark:bg-secondary-600 rounded w-1/2" />
+                <div className="h-5 bg-slate-200 dark:bg-secondary-600 rounded w-2/3" />
+                <div className="h-4 bg-slate-200 dark:bg-secondary-600 rounded w-full" />
+                <div className="h-4 bg-slate-200 dark:bg-secondary-600 rounded w-5/6" />
+              </div>
+            </div>
+          </div>
+          {/* Skills skeleton */}
+          <div className="card p-6 mb-6 animate-pulse">
+            <div className="h-5 bg-slate-200 dark:bg-secondary-600 rounded w-32 mb-4" />
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-8 w-24 bg-slate-200 dark:bg-secondary-600 rounded-full"
+                />
+              ))}
+            </div>
+          </div>
+          {/* Experience skeleton */}
+          <div className="card p-6 mb-6 animate-pulse">
+            <div className="h-5 bg-slate-200 dark:bg-secondary-600 rounded w-32 mb-4" />
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="w-3 h-3 rounded-full bg-slate-200 dark:bg-secondary-600 mt-2" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-200 dark:bg-secondary-600 rounded w-1/3" />
+                    <div className="h-3 bg-slate-200 dark:bg-secondary-600 rounded w-1/4" />
+                    <div className="h-3 bg-slate-200 dark:bg-secondary-600 rounded w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Projects skeleton */}
+          <div className="animate-pulse">
+            <div className="h-5 bg-slate-200 dark:bg-secondary-600 rounded w-32 mb-4" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="card p-4 space-y-3">
+                  <div className="h-40 bg-slate-200 dark:bg-secondary-600 rounded-xl" />
+                  <div className="h-4 bg-slate-200 dark:bg-secondary-600 rounded w-2/3" />
+                  <div className="h-3 bg-slate-200 dark:bg-secondary-600 rounded w-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Not found ----
+  if (notFound) {
+    return (
+      <div className="pt-16 min-h-screen bg-sage-50 dark:bg-secondary-700 flex items-center justify-center px-4">
+        <div className="card p-10 max-w-md text-center">
+          <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-secondary-600 flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-secondary-400" />
+          </div>
+          <h2 className="text-xl font-heading font-bold text-secondary-600 dark:text-white mb-2">
+            {t('portfolio.title')}
+          </h2>
+          <p className="text-secondary-400 dark:text-neutral-100 mb-6">
+            Portfolio not found.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> {t('common.back')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Not public ----
+  if (notPublic) {
+    return (
+      <div className="pt-16 min-h-screen bg-sage-50 dark:bg-secondary-700 flex items-center justify-center px-4">
+        <div className="card p-10 max-w-md text-center">
+          <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-secondary-600 flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-secondary-400" />
+          </div>
+          <h2 className="text-xl font-heading font-bold text-secondary-600 dark:text-white mb-2">
+            {t('portfolio.title')}
+          </h2>
+          <p className="text-secondary-400 dark:text-neutral-100 mb-6">
+            This portfolio is private.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> {t('common.back')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!portfolio) return null;
+
+  const socialLinks = (portfolio.social_links || {}) as Record<string, string>;
+  const socialEntries = Object.entries(socialLinks).filter(([, v]) => !!v);
+
+  const getSocialIcon = (key: string) => {
+    switch (key.toLowerCase()) {
+      case 'github':
+        return <Github className="w-5 h-5" />;
+      case 'linkedin':
+        return <Linkedin className="w-5 h-5" />;
+      case 'twitter':
+        return <Twitter className="w-5 h-5" />;
+      case 'website':
+      default:
+        return <Globe className="w-5 h-5" />;
+    }
+  };
+
+  const displayName = profileName || 'Portfolio';
+
+  return (
+    <div className="pt-16 min-h-screen bg-sage-50 dark:bg-secondary-700">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back button */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-sm text-secondary-400 dark:text-neutral-100 hover:text-primary-500 transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" /> {t('common.back')}
+        </button>
+
+        {/* Header */}
+        <div className="card p-6 sm:p-8 mb-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              {portfolio.avatar_url ? (
+                <img
+                  src={portfolio.avatar_url}
+                  alt={displayName}
+                  className="w-28 h-28 rounded-full object-cover border-4 border-primary-100 dark:border-secondary-600"
+                />
+              ) : (
+                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white">
+                  <User className="w-12 h-12" />
+                </div>
+              )}
+            </div>
+
+            {/* Name + headline + bio */}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-secondary-600 dark:text-white">
+                {displayName}
+              </h1>
+              {portfolio.headline && (
+                <p className="text-primary-500 font-medium mt-1">
+                  {portfolio.headline}
+                </p>
+              )}
+              {portfolio.bio && (
+                <p className="text-secondary-400 dark:text-neutral-100 mt-3 leading-relaxed">
+                  {portfolio.bio}
+                </p>
+              )}
+
+              {/* Social links + download */}
+              <div className="flex flex-wrap items-center gap-3 mt-5 justify-center sm:justify-start">
+                <button
+                  onClick={handleDownloadCV}
+                  className="btn-primary inline-flex items-center gap-2 text-sm"
+                >
+                  <Download className="w-4 h-4" /> {t('portfolio.download_cv')}
+                </button>
+
+                {socialEntries.map(([key, url]) => (
+                  <a
+                    key={key}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full bg-slate-50 dark:bg-secondary-600 flex items-center justify-center text-secondary-400 dark:text-neutral-100 hover:bg-primary-50 hover:text-primary-500 transition-colors"
+                    aria-label={key}
+                    title={key}
+                  >
+                    {getSocialIcon(key)}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Skills */}
+        {portfolio.skills && portfolio.skills.length > 0 && (
+          <div className="card p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="w-5 h-5 text-primary-500" />
+              <h2 className="text-lg font-heading font-semibold text-secondary-600 dark:text-white">
+                {t('portfolio.skills')}
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {portfolio.skills.map((skill, i) => (
+                <span
+                  key={`${skill}-${i}`}
+                  className="pill-badge"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Experience */}
+        {portfolio.experience && portfolio.experience.length > 0 && (
+          <div className="card p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Briefcase className="w-5 h-5 text-primary-500" />
+              <h2 className="text-lg font-heading font-semibold text-secondary-600 dark:text-white">
+                {t('portfolio.experience')}
+              </h2>
+            </div>
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-secondary-600" />
+              <div className="space-y-6">
+                {portfolio.experience.map((exp, i) => (
+                  <div key={i} className="relative pl-8">
+                    {/* Dot */}
+                    <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-primary-500 border-4 border-sage-50 dark:border-secondary-700" />
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                      <h3 className="font-semibold text-secondary-600 dark:text-white">
+                        {exp.title}
+                        {exp.company && (
+                          <span className="text-secondary-400 dark:text-neutral-100 font-normal">
+                            {' '}
+                            @ {exp.company}
+                          </span>
+                        )}
+                      </h3>
+                      <span className="text-xs text-secondary-400 dark:text-neutral-100 flex items-center gap-1 flex-shrink-0">
+                        <MapPin className="w-3 h-3" />
+                        {exp.end
+                          ? `${exp.start} - ${exp.end}`
+                          : `${exp.start} - Present`}
+                      </span>
+                    </div>
+                    {exp.description && (
+                      <p className="text-sm text-secondary-400 dark:text-neutral-100 mt-1 leading-relaxed">
+                        {exp.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Projects */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Folder className="w-5 h-5 text-primary-500" />
+            <h2 className="text-lg font-heading font-semibold text-secondary-600 dark:text-white">
+              {t('portfolio.projects')}
+            </h2>
+          </div>
+
+          {projects.length === 0 ? (
+            <div className="card p-8 text-center">
+              <Folder className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
+              <p className="text-secondary-400 dark:text-neutral-100">
+                {t('portfolio.no_projects')}
+              </p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((proj) => (
+                <div
+                  key={proj.id}
+                  className="card overflow-hidden hover:shadow-lg hover:-translate-y-1"
+                >
+                  {/* Image */}
+                  <div className="h-40 bg-slate-100 dark:bg-secondary-600 overflow-hidden">
+                    {proj.image_url ? (
+                      <img
+                        src={proj.image_url}
+                        alt={proj.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-100 to-primary-200 dark:from-secondary-600 dark:to-secondary-800">
+                        <Folder className="w-10 h-10 text-primary-500" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-5">
+                    <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">
+                      {proj.title}
+                    </h3>
+                    {proj.description && (
+                      <p className="text-sm text-secondary-400 dark:text-neutral-100 line-clamp-3 mb-3">
+                        {proj.description}
+                      </p>
+                    )}
+                    {proj.tags && proj.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {proj.tags.map((tag, i) => (
+                          <span
+                            key={`${tag}-${i}`}
+                            className="px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-600/20 text-primary-500 text-xs font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {proj.project_url && (
+                      <a
+                        href={proj.project_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-600 font-medium transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" /> View project
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer badge */}
+        <div className="text-center mt-10">
+          <div className="inline-flex items-center gap-2 text-sm text-secondary-400 dark:text-neutral-100">
+            <Award className="w-4 h-4 text-primary-500" />
+            Powered by Skills Academy
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
