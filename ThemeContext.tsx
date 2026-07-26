@@ -360,7 +360,7 @@ export default function EmployerPortalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-sage-50 dark:bg-secondary-700">
+    <div className="pt-16 min-h-screen bg-sage-50 dark:bg-secondary-700">
       {/* Header */}
       <div className="bg-white dark:bg-secondary-700 border-b border-slate-100 dark:border-secondary-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

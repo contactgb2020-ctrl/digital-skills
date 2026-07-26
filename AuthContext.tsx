@@ -327,6 +327,21 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
     setEarnings(earnings.map((e) => (e.id === id ? { ...e, status: 'paid', paid_at: new Date().toISOString() } : e)));
   }, [earnings]);
 
+  const confirmManualPayment = useCallback(async (payment: Payment) => {
+    await supabase.from('payments').update({ status: 'completed' }).eq('id', payment.id);
+    setPayments((prev) => prev.map((p) => (p.id === payment.id ? { ...p, status: 'completed' } : p)));
+
+    if (payment.subscription_id) {
+      const newEndDate = new Date();
+      newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'active', end_date: newEndDate.toISOString() })
+        .eq('id', payment.subscription_id);
+      setSubscriptions((prev) => prev.map((s) => (s.id === payment.subscription_id ? { ...s, status: 'active', end_date: newEndDate.toISOString() } : s)));
+    }
+  }, []);
+
   const createRole = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoleName.trim()) return;
@@ -891,6 +906,46 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Premium" value={revenueByPlan['premium'] || 0} prefix="$" />
                 <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Enterprise" value={revenueByPlan['enterprise'] || 0} prefix="$" />
               </div>
+
+              {payments.some((p) => p.status === 'pending') && (
+                <div className="card p-6">
+                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-primary-500" /> Paiements manuels en attente
+                  </h3>
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
+                    Virements / Mobile Money soumis par les étudiants, en attendant Paystack / CinetPay. Vérifiez la référence puis confirmez.
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-secondary-600 dark:bg-secondary-800 text-white">
+                        <tr>
+                          <th className="text-left p-3 text-sm font-medium">Montant</th>
+                          <th className="text-left p-3 text-sm font-medium">Référence</th>
+                          <th className="text-left p-3 text-sm font-medium">Note</th>
+                          <th className="text-left p-3 text-sm font-medium">Date</th>
+                          <th className="text-left p-3 text-sm font-medium">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {payments.filter((p) => p.status === 'pending').map((p) => (
+                          <tr key={p.id} className="border-b border-slate-100 dark:border-secondary-500">
+                            <td className="p-3 text-sm font-semibold text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
+                            <td className="p-3 text-sm text-secondary-600 dark:text-neutral-100">{p.reference || '—'}</td>
+                            <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{p.note || '—'}</td>
+                            <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{new Date(p.created_at).toLocaleDateString()}</td>
+                            <td className="p-3">
+                              <button onClick={() => confirmManualPayment(p)} className="btn-primary text-xs py-1.5 px-3">
+                                Confirmer
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               <div className="card p-6">
                 <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                   <PieChart className="w-5 h-5 text-primary-500" /> Subscription Revenue Breakdown

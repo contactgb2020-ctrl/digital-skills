@@ -3,13 +3,14 @@ import {
   Flame, Star, Award, BookOpen, Clock, TrendingUp, Target, CheckCircle,
   Play, BarChart3, Bookmark, Heart, FileText, Download, ChevronRight,
   Layers, GraduationCap, Briefcase, User, Calendar, Zap, Building2,
+  CreditCard, X, AlertCircle,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Course, Enrollment, Certificate, CareerPath, Bookmark as BookmarkType, StudentStats, Portfolio } from '../types';
+import type { Course, Enrollment, Certificate, CareerPath, Bookmark as BookmarkType, StudentStats, Portfolio, Subscription } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 type Tab = 'overview' | 'my_paths' | 'explore_paths' | 'certificates' | 'bookmarks' | 'wishlist' | 'portfolio';
@@ -44,6 +45,13 @@ export default function StudentDashboard() {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscriptionDaysLeft, setSubscriptionDaysLeft] = useState<number | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentRef, setPaymentRef] = useState('');
+  const [paymentNote, setPaymentNote] = useState('');
+  const [paymentSubmitting, setPaymentSubmitting] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
 
   const userId = session?.user?.id;
 
@@ -143,6 +151,22 @@ export default function StudentDashboard() {
         .maybeSingle();
       if (portData) setPortfolio(portData as Portfolio);
 
+      // 8. current subscription (for trial / payment status)
+      const { data: subData } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (subData) {
+        const sub = subData as Subscription;
+        setSubscription(sub);
+        if (sub.status === 'trial' && sub.end_date) {
+          setSubscriptionDaysLeft(Math.ceil((new Date(sub.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+        }
+      }
+
       setLoading(false);
     })();
   }, [userId]);
@@ -150,6 +174,28 @@ export default function StudentDashboard() {
   // ---- helpers ----
   const studentName = profile?.nom || profile?.email?.split('@')[0] || '';
   const categories = ['all', ...Array.from(new Set(careerPaths.map((p) => p.category).filter(Boolean)))];
+
+  // Temporary manual pricing (matches PricingPage) — used while Paystack/Cinetpay are pending validation
+  const PLAN_PRICES: Record<string, number> = { starter: 189, professional: 249, expert: 290, bundle: 499, premium: 249, enterprise: 499 };
+
+  const trialDaysLeft = subscriptionDaysLeft;
+
+  const handleSubmitPayment = async () => {
+    if (!userId || !subscription || !paymentRef.trim()) return;
+    setPaymentSubmitting(true);
+    await supabase.from('payments').insert({
+      user_id: userId,
+      subscription_id: subscription.id,
+      provider: 'manual_transfer',
+      amount: PLAN_PRICES[subscription.plan] || 0,
+      currency: 'USD',
+      status: 'pending',
+      reference: paymentRef.trim(),
+      note: paymentNote.trim() || null,
+    });
+    setPaymentSubmitting(false);
+    setPaymentSubmitted(true);
+  };
 
   const toggleWishlist = async (pathId: string) => {
     if (!userId) return;
@@ -202,6 +248,38 @@ export default function StudentDashboard() {
         <DashboardSkeleton />
       ) : (
         <>
+          {subscription?.status === 'trial' && (
+            <div className={`mb-6 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between ${
+              trialDaysLeft !== null && trialDaysLeft <= 0
+                ? 'bg-alert-50 dark:bg-alert-600/10 border border-alert-200 dark:border-alert-600'
+                : 'bg-primary-50 dark:bg-primary-600/10 border border-primary-200 dark:border-primary-600'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  trialDaysLeft !== null && trialDaysLeft <= 0 ? 'bg-alert-500 text-white' : 'bg-primary-500 text-white'
+                }`}>
+                  {trialDaysLeft !== null && trialDaysLeft <= 0 ? <AlertCircle className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                </div>
+                <div>
+                  <p className="font-semibold text-secondary-600 dark:text-white">
+                    {trialDaysLeft !== null && trialDaysLeft <= 0
+                      ? "Votre essai gratuit est terminé"
+                      : `Il vous reste ${trialDaysLeft} jour${trialDaysLeft && trialDaysLeft > 1 ? 's' : ''} d'essai gratuit`}
+                  </p>
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100">
+                    Confirmez votre paiement pour garder l'accès à votre plan {subscription.plan}.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowPaymentModal(true); setPaymentSubmitted(false); setPaymentRef(''); setPaymentNote(''); }}
+                className="btn-primary whitespace-nowrap flex items-center justify-center gap-2"
+              >
+                <CreditCard className="w-4 h-4" /> Confirmer mon paiement
+              </button>
+            </div>
+          )}
+
           {tab === 'overview' && (
             <OverviewTab
               studentName={studentName}
@@ -267,6 +345,71 @@ export default function StudentDashboard() {
             />
           )}
         </>
+      )}
+
+      {showPaymentModal && subscription && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setShowPaymentModal(false)}>
+          <div className="card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-secondary-600 dark:text-white">Confirmer mon paiement</h3>
+              <button onClick={() => setShowPaymentModal(false)} className="text-secondary-400 hover:text-secondary-600 dark:hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {paymentSubmitted ? (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-success-100 dark:bg-success-600/20 flex items-center justify-center">
+                  <CheckCircle className="w-7 h-7 text-success-500" />
+                </div>
+                <p className="font-semibold text-secondary-600 dark:text-white mb-1">Paiement en cours de vérification</p>
+                <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
+                  Nous confirmons votre paiement manuellement sous 24h. Votre accès reste actif pendant la vérification.
+                </p>
+                <button onClick={() => setShowPaymentModal(false)} className="btn-primary w-full">Fermer</button>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 p-3 rounded-lg bg-primary-50 dark:bg-primary-600/10 border border-primary-200 dark:border-primary-600 text-sm text-secondary-600 dark:text-neutral-100">
+                  <p className="font-semibold mb-2">Plan {subscription.plan} — ${PLAN_PRICES[subscription.plan] || 0}/an</p>
+                  <p className="mb-1">Le paiement en ligne (Paystack / CinetPay) arrive bientôt. En attendant, effectuez le règlement via :</p>
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>Mobile Money (Orange, MTN, Wave) : <span className="font-medium">[numéro à ajouter par l'admin]</span></li>
+                    <li>Virement bancaire : <span className="font-medium">[RIB à ajouter par l'admin]</span></li>
+                  </ul>
+                  <p className="mt-2 text-xs text-secondary-400 dark:text-neutral-100">Indiquez votre email comme référence du virement.</p>
+                </div>
+
+                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Référence / n° de transaction *</label>
+                <input
+                  type="text"
+                  required
+                  value={paymentRef}
+                  onChange={(e) => setPaymentRef(e.target.value)}
+                  placeholder="Ex: TX123456 ou nom du dépositaire"
+                  className="input-field mb-3"
+                />
+
+                <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Note (optionnel)</label>
+                <textarea
+                  rows={2}
+                  value={paymentNote}
+                  onChange={(e) => setPaymentNote(e.target.value)}
+                  placeholder="Précisions utiles pour vérifier votre paiement"
+                  className="input-field mb-4"
+                />
+
+                <button
+                  onClick={handleSubmitPayment}
+                  disabled={!paymentRef.trim() || paymentSubmitting}
+                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {paymentSubmitting ? 'Envoi...' : 'Confirmer mon paiement'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </DashboardLayout>
   );

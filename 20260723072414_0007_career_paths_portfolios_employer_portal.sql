@@ -276,9 +276,9 @@ export default function SignupPage() {
       if (selectedRole === 'trainer') {
         // No subscription created for trainers
       } else {
-        // Student: create annual subscription with 3-day trial
+        // Student: create annual subscription with 7-day trial
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 3); // 3-day trial
+        endDate.setDate(endDate.getDate() + 7); // 7-day trial
         const annualEnd = new Date();
         annualEnd.setFullYear(annualEnd.getFullYear() + 1);
 
