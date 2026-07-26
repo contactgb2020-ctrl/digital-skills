@@ -9,7 +9,6 @@ import {
   CheckCircle,
   XCircle,
   Building2,
-  MapPin,
   Star,
   Download,
   Mail,
@@ -108,7 +107,7 @@ export default function EmployerPortalPage() {
         }
 
         // Fetch certificate counts per user
-        let certCounts: Record<string, number> = {};
+        const certCounts: Record<string, number> = {};
         if (studentIds.length > 0) {
           const { data: certData } = await supabase
             .from('certificates')
@@ -155,13 +154,15 @@ export default function EmployerPortalPage() {
 
   // Load saved candidates + saved id set for the current employer
   useEffect(() => {
-    if (!session?.user) {
-      setSavedCandidates([]);
-      setSavedLoading(false);
-      return;
-    }
     let mounted = true;
     (async () => {
+      if (!session?.user) {
+        if (mounted) {
+          setSavedCandidates([]);
+          setSavedLoading(false);
+        }
+        return;
+      }
       setSavedLoading(true);
       try {
         const { data, error } = await supabase
@@ -174,8 +175,8 @@ export default function EmployerPortalPage() {
 
         // Hydrate student profiles + portfolios
         const studentIds = rows.map((r) => r.student_id);
-        let profileMap = new Map<string, { nom: string; email: string; avatar: string | null }>();
-        let portMap = new Map<string, { id: string; headline: string | null; skills: string[] }>();
+        const profileMap = new Map<string, { nom: string; email: string; avatar: string | null }>();
+        const portMap = new Map<string, { id: string; headline: string | null; skills: string[] }>();
 
         if (studentIds.length > 0) {
           const [profRes, portRes] = await Promise.all([
@@ -359,7 +360,7 @@ export default function EmployerPortalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-sage-50 dark:bg-secondary-700">
+    <div className="pt-16 min-h-screen bg-sage-50 dark:bg-secondary-700">
       {/* Header */}
       <div className="bg-white dark:bg-secondary-700 border-b border-slate-100 dark:border-secondary-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

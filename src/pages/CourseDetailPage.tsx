@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BookOpen, Play, Star, Clock, Users, Lock, CheckCircle, ChevronLeft, ChevronRight, Award, FileText, Video, HelpCircle, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
@@ -10,7 +10,7 @@ import type { TranslationKey as TKey } from '../i18n/translations';
 export default function CourseDetailPage({ courseId }: { courseId: string }) {
   const { t } = useLanguage();
   const { navigate } = useRouter();
-  const { session, profile } = useAuth();
+  const { session } = useAuth();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -64,7 +64,10 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
   }, [courseId, session]);
 
   const isEnrolled = !!enrollment;
-  const completedLessonIds = new Set(progress.filter((p) => p.completed).map((p) => p.lesson_id));
+  const completedLessonIds = useMemo(
+    () => new Set(progress.filter((p) => p.completed).map((p) => p.lesson_id)),
+    [progress]
+  );
   const completedCount = completedLessonIds.size;
   const totalLessons = lessons.length;
   const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;

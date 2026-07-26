@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Eye, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Award, Layers, Play, MessageSquare, Megaphone, Building2 } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Layers, MessageSquare, Megaphone, Building2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { uploadFile } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Course, Lesson, Quiz, Enrollment, Review, Category, TrainerEarning } from '../types';
+import type { Course, Lesson, Review, Category, TrainerEarning } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
@@ -64,67 +64,69 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const [annForm, setAnnForm] = useState({ title: '', content: '' });
   const [annPosting, setAnnPosting] = useState(false);
 
-  const loadCourses = useCallback(async () => {
-    if (!session?.user) return;
-    const { data: catData } = await supabase.from('categories').select('*').order('name', { ascending: true });
-    if (catData) {
-      setCategories(catData as Category[]);
-      if (catData.length > 0 && !formData.category) {
-        setFormData((prev) => ({ ...prev, category: (catData[0] as Category).name, category_id: (catData[0] as Category).id }));
+  useEffect(() => {
+    (async () => {
+      if (!session?.user) return;
+      const { data: catData } = await supabase.from('categories').select('*').order('name', { ascending: true });
+      if (catData) {
+        setCategories(catData as Category[]);
+        if (catData.length > 0) {
+          setFormData((prev) => prev.category ? prev : { ...prev, category: (catData[0] as Category).name, category_id: (catData[0] as Category).id });
+        }
       }
-    }
 
-    const { data: earnData } = await supabase.from('trainer_earnings').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
-    if (earnData) setEarnings(earnData as TrainerEarning[]);
+      const { data: earnData } = await supabase.from('trainer_earnings').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
+      if (earnData) setEarnings(earnData as TrainerEarning[]);
 
-    const { data } = await supabase.from('courses').select('*').eq('created_by', session.user.id).order('created_at', { ascending: false });
-    if (data) {
-      setCourses(data as Course[]);
-      for (const course of data as Course[]) {
-        const { data: lessons } = await supabase.from('lessons').select('*').eq('course_id', course.id).order('order_number', { ascending: true });
-        if (lessons) setCourseLessons((prev) => ({ ...prev, [course.id]: lessons as Lesson[] }));
+      const { data } = await supabase.from('courses').select('*').eq('created_by', session.user.id).order('created_at', { ascending: false });
+      if (data) {
+        setCourses(data as Course[]);
+        for (const course of data as Course[]) {
+          const { data: lessons } = await supabase.from('lessons').select('*').eq('course_id', course.id).order('order_number', { ascending: true });
+          if (lessons) setCourseLessons((prev) => ({ ...prev, [course.id]: lessons as Lesson[] }));
 
-        const { count } = await supabase.from('enrollments').select('*', { count: 'exact', head: true }).eq('course_id', course.id);
-        setCourseEnrollments((prev) => ({ ...prev, [course.id]: count || 0 }));
+          const { count } = await supabase.from('enrollments').select('*', { count: 'exact', head: true }).eq('course_id', course.id);
+          setCourseEnrollments((prev) => ({ ...prev, [course.id]: count || 0 }));
 
-        const { data: reviews } = await supabase.from('reviews').select('*').eq('course_id', course.id);
-        if (reviews) setCourseReviews((prev) => ({ ...prev, [course.id]: reviews as Review[] }));
+          const { data: reviews } = await supabase.from('reviews').select('*').eq('course_id', course.id);
+          if (reviews) setCourseReviews((prev) => ({ ...prev, [course.id]: reviews as Review[] }));
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    })();
   }, [session]);
-
-  useEffect(() => { loadCourses(); }, [loadCourses]);
 
   // Load analytics overview: enrollment count, earnings sum, avg completion, avg rating
-  const loadAnalytics = useCallback(async () => {
-    if (!session?.user) return;
-    const { data: coursesData } = await supabase.from('courses').select('id').eq('created_by', session.user.id);
-    const courseIds = (coursesData || []).map((c) => c.id);
-    if (courseIds.length === 0) { setAnalytics({ studentCount: 0, revenue: 0, completionRate: 0, avgRating: 0 }); return; }
+  useEffect(() => {
+    (async () => {
+      if (!session?.user) return;
+      const { data: coursesData } = await supabase.from('courses').select('id').eq('created_by', session.user.id);
+      const courseIds = (coursesData || []).map((c) => c.id);
+      if (courseIds.length === 0) { setAnalytics({ studentCount: 0, revenue: 0, completionRate: 0, avgRating: 0 }); return; }
 
-    const { count: studentCount } = await supabase.from('enrollments').select('*', { count: 'exact', head: true }).in('course_id', courseIds);
+      const { count: studentCount } = await supabase.from('enrollments').select('*', { count: 'exact', head: true }).in('course_id', courseIds);
 
-    const { data: enrollRows } = await supabase.from('enrollments').select('progress_pct').in('course_id', courseIds);
-    const completionRate = enrollRows && enrollRows.length > 0 ? enrollRows.reduce((s, e) => s + Number(e.progress_pct || 0), 0) / enrollRows.length : 0;
+      const { data: enrollRows } = await supabase.from('enrollments').select('progress_pct').in('course_id', courseIds);
+      const completionRate = enrollRows && enrollRows.length > 0 ? enrollRows.reduce((s, e) => s + Number(e.progress_pct || 0), 0) / enrollRows.length : 0;
 
-    const { data: earnRows } = await supabase.from('trainer_earnings').select('amount_due').eq('trainer_id', session.user.id);
-    const revenue = (earnRows || []).reduce((s, e) => s + Number(e.amount_due || 0), 0);
+      const { data: earnRows } = await supabase.from('trainer_earnings').select('amount_due').eq('trainer_id', session.user.id);
+      const revenue = (earnRows || []).reduce((s, e) => s + Number(e.amount_due || 0), 0);
 
-    const { data: reviewRows } = await supabase.from('reviews').select('rating').in('course_id', courseIds);
-    const avgRating = reviewRows && reviewRows.length > 0 ? reviewRows.reduce((s, r) => s + Number(r.rating || 0), 0) / reviewRows.length : 0;
+      const { data: reviewRows } = await supabase.from('reviews').select('rating').in('course_id', courseIds);
+      const avgRating = reviewRows && reviewRows.length > 0 ? reviewRows.reduce((s, r) => s + Number(r.rating || 0), 0) / reviewRows.length : 0;
 
-    setAnalytics({ studentCount: studentCount || 0, revenue, completionRate, avgRating });
+      setAnalytics({ studentCount: studentCount || 0, revenue, completionRate, avgRating });
+    })();
   }, [session]);
-  useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
 
   // Load announcements for this trainer
-  const loadAnnouncements = useCallback(async () => {
-    if (!session?.user) return;
-    const { data } = await supabase.from('announcements').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
-    if (data) setAnnouncements(data as { id: string; title: string; content: string; created_at: string }[]);
+  useEffect(() => {
+    (async () => {
+      if (!session?.user) return;
+      const { data } = await supabase.from('announcements').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
+      if (data) setAnnouncements(data as { id: string; title: string; content: string; created_at: string }[]);
+    })();
   }, [session]);
-  useEffect(() => { loadAnnouncements(); }, [loadAnnouncements]);
 
   const handlePostAnnouncement = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,7 +178,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
     setFormData({ title: '', description: '', category: categories.length > 0 ? categories[0].name : '', category_id: categories.length > 0 ? categories[0].id : '', level: 'Débutant', imageFile: null, image: '' });
     setShowForm(false);
     setTab('courses');
-  }, [session, editingCourse, formData, courses, courseLessons]);
+  }, [session, editingCourse, formData, courses, courseLessons, categories]);
 
   const handleEdit = useCallback((course: Course) => {
     setEditingCourse(course);
@@ -422,7 +424,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.description')}</label>
                 <textarea required rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="input-field" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.category')}</label>
                   <select value={formData.category_id} onChange={(e) => {
@@ -477,7 +479,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                   />
                   {lessonForm.videoFile && <p className="text-xs text-success-500 mt-1">{lessonForm.videoFile.name}</p>}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.duration')}</label>
                     <input type="number" min={0} value={lessonForm.duration} onChange={(e) => setLessonForm({ ...lessonForm, duration: parseInt(e.target.value) || 0 })} className="input-field" />

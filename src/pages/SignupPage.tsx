@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, User, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, MapPin, Plus, GraduationCap, BookOpen, Upload, FileCheck, ShieldCheck, Layers, Briefcase, Palette, Scissors, Wrench, Languages, Code2, Megaphone } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, MapPin, Plus, GraduationCap, BookOpen, Upload, FileCheck, ShieldCheck, Layers, Briefcase, Palette, Scissors, Wrench, Languages, Code2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
@@ -54,22 +54,13 @@ export default function SignupPage() {
 
   const [selectedPlan, setSelectedPlan] = useState('professional');
   const [selectedRole, setSelectedRole] = useState<'student' | 'trainer'>('student');
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string; icon: string | null }[]>([]);
+  const [selectedCategoryIds] = useState<string[]>([]);
   const [careerPaths, setCareerPaths] = useState<CareerPath[]>([]);
   const [selectedCareerPathId, setSelectedCareerPathId] = useState<string>('');
   const [documentType, setDocumentType] = useState('national_id');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [diplomaFile, setDiplomaFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-
-  // Load categories on mount
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from('categories').select('id, name, icon').order('name');
-      if (data) setCategories(data as { id: string; name: string; icon: string | null }[]);
-    })();
-  }, []);
 
   // Load career paths on mount
   useEffect(() => {
@@ -93,53 +84,52 @@ export default function SignupPage() {
 
   // Load regions when country changes
   useEffect(() => {
-    if (!selectedCountry) {
-      setRegions([]);
-      return;
-    }
     (async () => {
+      setSelectedRegion('');
+      setSelectedCity('');
+      setSelectedDistrict('');
+      setCities([]);
+      setDistricts([]);
+      if (!selectedCountry) {
+        setRegions([]);
+        return;
+      }
       const { data } = await supabase
         .from('regions')
         .select('*')
         .eq('country_id', selectedCountry)
         .order('name');
-      if (data) setRegions(data as Region[]);
+      setRegions((data as Region[]) || []);
     })();
-    setRegions([]);
-    setSelectedRegion('');
-    setSelectedCity('');
-    setSelectedDistrict('');
-    setCities([]);
-    setDistricts([]);
   }, [selectedCountry]);
 
   // Load cities when region changes
   useEffect(() => {
-    if (!selectedRegion) {
-      setCities([]);
-      return;
-    }
     (async () => {
+      setSelectedCity('');
+      setSelectedDistrict('');
+      setDistricts([]);
+      if (!selectedRegion) {
+        setCities([]);
+        return;
+      }
       const { data } = await supabase
         .from('cities')
         .select('*')
         .eq('region_id', selectedRegion)
         .order('name');
-      if (data) setCities(data as City[]);
+      setCities((data as City[]) || []);
     })();
-    setCities([]);
-    setSelectedCity('');
-    setSelectedDistrict('');
-    setDistricts([]);
   }, [selectedRegion]);
 
   // Load districts when city changes
   useEffect(() => {
-    if (!selectedCity) {
-      setDistricts([]);
-      return;
-    }
     (async () => {
+      setSelectedDistrict('');
+      if (!selectedCity) {
+        setDistricts([]);
+        return;
+      }
       const { data } = await supabase
         .from('districts')
         .select('*')
@@ -147,8 +137,6 @@ export default function SignupPage() {
         .order('name');
       if (data) setDistricts(data as District[]);
     })();
-    setDistricts([]);
-    setSelectedDistrict('');
   }, [selectedCity]);
 
   const [pendingSuggestion, setPendingSuggestion] = useState<{ level: string; parentId: string | null; name: string } | null>(null);
@@ -288,9 +276,9 @@ export default function SignupPage() {
       if (selectedRole === 'trainer') {
         // No subscription created for trainers
       } else {
-        // Student: create annual subscription with 3-day trial
+        // Student: create annual subscription with 7-day trial
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 3); // 3-day trial
+        endDate.setDate(endDate.getDate() + 7); // 7-day trial
         const annualEnd = new Date();
         annualEnd.setFullYear(annualEnd.getFullYear() + 1);
 
@@ -310,7 +298,6 @@ export default function SignupPage() {
 
   // Steps: 1=Info, 2=Role, 3=CareerPath (students only), 4=Location, 5=KYC, 6=Plan (students only), 7=Confirm
   const steps = selectedRole === 'trainer' ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7];
-  const totalSteps = steps.length;
 
   return (
     <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-light to-primary-50 dark:from-secondary-700 dark:to-secondary-800 px-4 py-12">

@@ -84,6 +84,8 @@ export interface Payment {
   amount: number;
   currency: string;
   status: string;
+  reference?: string | null;
+  note?: string | null;
   created_at: string;
 }
 

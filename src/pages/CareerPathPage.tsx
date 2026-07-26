@@ -8,7 +8,6 @@ import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { CareerPath, CareerPathCourse, Course } from '../types';
-import type { TranslationKey as TKey } from '../i18n/translations';
 
 type Tab = 'overview' | 'curriculum' | 'projects' | 'opportunities' | 'instructor' | 'reviews' | 'faq';
 
@@ -139,7 +138,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
     if (!path) return '';
     if (path.price_cents === 0) return 'Free';
     return `$${(path.price_cents / 100).toFixed(2)}`;
-  }, [path, t]);
+  }, [path]);
 
   const totalCourses = useMemo(() => modules.reduce((sum, m) => sum + m.courses.length, 0), [modules]);
 

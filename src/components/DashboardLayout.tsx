@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { BookOpen, Building2, GraduationCap, Shield, LayoutDashboard, LogOut, Menu, X, Home } from 'lucide-react';
+import { GraduationCap, Shield, LayoutDashboard, LogOut, Menu, X, Home } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';

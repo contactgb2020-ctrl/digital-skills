@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   Search, ArrowRight, Star, Users, Award, Briefcase, TrendingUp, Clock,
   CheckCircle, ShieldCheck, Building2, Quote, Sparkles, GraduationCap,
-  BookOpen, Target, Flame, ChevronDown, Code2, Palette, Scissors, Wrench,
-  Languages, Megaphone, Camera, Play,
+  BookOpen, Target, ChevronDown, Code2, Palette, Scissors, Wrench,
+  Languages,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';

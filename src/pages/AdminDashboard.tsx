@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Users, BookOpen, MapPin, BarChart3, TrendingUp, CheckCircle, XCircle, Search, Star, Trash2, CreditCard, DollarSign, Shield, AlertTriangle,
-  FileCheck, FolderPlus, Wallet, UserCog, Settings, Clock,
+  Users, BookOpen, MapPin, BarChart3, TrendingUp, CheckCircle, XCircle, Search, Trash2, CreditCard, DollarSign, Shield, AlertTriangle,
+  FileCheck, FolderPlus, Wallet, UserCog, Settings,
   Award, Building2, Tag, Download, LifeBuoy, PieChart,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getPrivateFileUrl } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Profile, Course, LocationSuggestion, Subscription, Payment, KycDocument, Category, TrainerEarning, CustomRole, RolePermission, StaffMember } from '../types';
+import type { Profile, Course, LocationSuggestion, Subscription, Payment, KycDocument, Category, TrainerEarning, CustomRole, RolePermission, StaffMember, Certificate, EmployerProfile, Coupon, SupportTicket } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 const SUPER_ADMIN_EMAILS = ['vincentnogue2@gmail.com', 'vincentnogue@yahoo.com', 'webdxb1@gmail.com'];
@@ -79,19 +79,19 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
   const [revenueByPlan, setRevenueByPlan] = useState<Record<string, number>>({});
 
   // Certificates state
-  const [certificates, setCertificates] = useState<any[]>([]);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [certHolderNames, setCertHolderNames] = useState<Record<string, string>>({});
   const [certCourseTitles, setCertCourseTitles] = useState<Record<string, string>>({});
 
   // Employers state
-  const [employers, setEmployers] = useState<any[]>([]);
+  const [employers, setEmployers] = useState<EmployerProfile[]>([]);
 
   // Coupons state
-  const [coupons, setCoupons] = useState<any[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [newCoupon, setNewCoupon] = useState({ code: '', discount_percent: 10, max_uses: 100 });
 
   // Support tickets state
-  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
   const [ticketUserNames, setTicketUserNames] = useState<Record<string, string>>({});
 
   // Settings state
@@ -172,16 +172,11 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
       // Revenue by plan (from completed payments joined with subscriptions)
       const planRevenue: Record<string, number> = { starter: 0, premium: 0, enterprise: 0 };
-      (subData as Subscription[] || []).forEach((s) => {
-        const planPayments = (payData as Payment[] || []).filter((p) => p.status === 'completed');
-        // approximate: distribute total completed payments across plans proportionally
-        planRevenue[s.plan] = (planRevenue[s.plan] || 0) + 0;
-      });
-      // Simple: sum completed payments per plan via subscription lookup
+      // Sum completed payments per plan via subscription lookup
       const subById: Record<string, Subscription> = {};
       (subData as Subscription[] || []).forEach((s) => { subById[s.id] = s; });
       (payData as Payment[] || []).filter((p) => p.status === 'completed').forEach((p) => {
-        const sub = subById[(p as any).subscription_id];
+        const sub = subById[p.subscription_id ?? ''];
         if (sub && sub.plan) planRevenue[sub.plan] = (planRevenue[sub.plan] || 0) + Number(p.amount);
       });
       setRevenueByPlan(planRevenue);
@@ -189,42 +184,42 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
       // Certificates
       const { data: certData } = await supabase.from('certificates').select('*').order('created_at', { ascending: false }).limit(50);
       if (certData) {
-        setCertificates(certData);
-        const cUserIds = [...new Set((certData as any[]).map((c) => c.user_id))];
-        const cCourseIds = [...new Set((certData as any[]).map((c) => c.course_id))];
+        setCertificates(certData as Certificate[]);
+        const cUserIds = [...new Set((certData as Certificate[]).map((c) => c.user_id))];
+        const cCourseIds = [...new Set((certData as Certificate[]).map((c) => c.course_id))];
         const [{ data: cProfiles }, { data: cCourses }] = await Promise.all([
           supabase.from('profiles').select('id, nom, email').in('id', cUserIds),
           supabase.from('courses').select('id, title').in('id', cCourseIds),
         ]);
         if (cProfiles) {
           const map: Record<string, string> = {};
-          (cProfiles as any[]).forEach((p) => { map[p.id] = p.nom || p.email; });
+          (cProfiles as Pick<Profile, 'id' | 'nom' | 'email'>[]).forEach((p) => { map[p.id] = p.nom || p.email; });
           setCertHolderNames(map);
         }
         if (cCourses) {
           const map: Record<string, string> = {};
-          (cCourses as any[]).forEach((c) => { map[c.id] = c.title; });
+          (cCourses as Pick<Course, 'id' | 'title'>[]).forEach((c) => { map[c.id] = c.title; });
           setCertCourseTitles(map);
         }
       }
 
       // Employers
       const { data: empData } = await supabase.from('employer_profiles').select('*').order('created_at', { ascending: false });
-      if (empData) setEmployers(empData as any[]);
+      if (empData) setEmployers(empData as EmployerProfile[]);
 
       // Coupons
       const { data: couponData } = await supabase.from('coupons').select('*').order('created_at', { ascending: false });
-      if (couponData) setCoupons(couponData as any[]);
+      if (couponData) setCoupons(couponData as Coupon[]);
 
       // Support tickets
       const { data: ticketData } = await supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(50);
       if (ticketData) {
-        setSupportTickets(ticketData as any[]);
-        const tUserIds = [...new Set((ticketData as any[]).map((t) => t.user_id))];
+        setSupportTickets(ticketData as SupportTicket[]);
+        const tUserIds = [...new Set((ticketData as SupportTicket[]).map((t) => t.user_id))];
         const { data: tProfiles } = await supabase.from('profiles').select('id, nom, email').in('id', tUserIds);
         if (tProfiles) {
           const map: Record<string, string> = {};
-          (tProfiles as any[]).forEach((p) => { map[p.id] = p.nom || p.email; });
+          (tProfiles as Pick<Profile, 'id' | 'nom' | 'email'>[]).forEach((p) => { map[p.id] = p.nom || p.email; });
           setTicketUserNames(map);
         }
       }
@@ -331,6 +326,21 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
     await supabase.from('trainer_earnings').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', id);
     setEarnings(earnings.map((e) => (e.id === id ? { ...e, status: 'paid', paid_at: new Date().toISOString() } : e)));
   }, [earnings]);
+
+  const confirmManualPayment = useCallback(async (payment: Payment) => {
+    await supabase.from('payments').update({ status: 'completed' }).eq('id', payment.id);
+    setPayments((prev) => prev.map((p) => (p.id === payment.id ? { ...p, status: 'completed' } : p)));
+
+    if (payment.subscription_id) {
+      const newEndDate = new Date();
+      newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'active', end_date: newEndDate.toISOString() })
+        .eq('id', payment.subscription_id);
+      setSubscriptions((prev) => prev.map((s) => (s.id === payment.subscription_id ? { ...s, status: 'active', end_date: newEndDate.toISOString() } : s)));
+    }
+  }, []);
 
   const createRole = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -475,7 +485,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
                 <div className="card p-6">
                   <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('admin.role_distribution')}</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {(['student', 'trainer', 'super_admin'] as const).map((role) => (
                       <div key={role} className="text-center p-4 rounded-xl bg-gray-50 dark:bg-secondary-600">
                         <div className="text-2xl font-bold text-secondary-600 dark:text-white">{roleCounts[role] || 0}</div>
@@ -847,7 +857,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {/* SUBSCRIPTIONS */}
           {tab === 'subscriptions' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {(['starter', 'premium', 'enterprise'] as const).map((plan) => (
                   <div key={plan} className="card p-6 text-center">
                     <div className="text-3xl font-bold text-primary-500 mb-1">{planCounts[plan] || 0}</div>
@@ -896,6 +906,46 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Premium" value={revenueByPlan['premium'] || 0} prefix="$" />
                 <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Enterprise" value={revenueByPlan['enterprise'] || 0} prefix="$" />
               </div>
+
+              {payments.some((p) => p.status === 'pending') && (
+                <div className="card p-6">
+                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-primary-500" /> Paiements manuels en attente
+                  </h3>
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
+                    Virements / Mobile Money soumis par les étudiants, en attendant Paystack / CinetPay. Vérifiez la référence puis confirmez.
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-secondary-600 dark:bg-secondary-800 text-white">
+                        <tr>
+                          <th className="text-left p-3 text-sm font-medium">Montant</th>
+                          <th className="text-left p-3 text-sm font-medium">Référence</th>
+                          <th className="text-left p-3 text-sm font-medium">Note</th>
+                          <th className="text-left p-3 text-sm font-medium">Date</th>
+                          <th className="text-left p-3 text-sm font-medium">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {payments.filter((p) => p.status === 'pending').map((p) => (
+                          <tr key={p.id} className="border-b border-slate-100 dark:border-secondary-500">
+                            <td className="p-3 text-sm font-semibold text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
+                            <td className="p-3 text-sm text-secondary-600 dark:text-neutral-100">{p.reference || '—'}</td>
+                            <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{p.note || '—'}</td>
+                            <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{new Date(p.created_at).toLocaleDateString()}</td>
+                            <td className="p-3">
+                              <button onClick={() => confirmManualPayment(p)} className="btn-primary text-xs py-1.5 px-3">
+                                Confirmer
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               <div className="card p-6">
                 <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                   <PieChart className="w-5 h-5 text-primary-500" /> Subscription Revenue Breakdown
@@ -1096,7 +1146,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ticket.status === 'open' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : ticket.status === 'resolved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
                               {ticket.status}
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ticket.priority === 'high' ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : ticket.priority === 'medium' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${(ticket.priority === 'high' || ticket.priority === 'urgent') ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : ticket.priority === 'normal' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
                               {ticket.priority}
                             </span>
                           </div>

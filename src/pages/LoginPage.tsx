@@ -31,12 +31,6 @@ export default function LoginPage() {
     navigate('/dashboard');
   };
 
-  const getDashboardPath = (role?: string): string => {
-    if (role === 'super_admin') return '/super-admin';
-    if (role === 'trainer') return '/trainer';
-    return '/dashboard';
-  };
-
   return (
     <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-light to-primary-50 dark:from-secondary-700 dark:to-secondary-800 px-4 py-12">
       <div className="w-full max-w-md animate-fade-in-up">

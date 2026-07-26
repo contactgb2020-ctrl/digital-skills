@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Lock, Play, Search, Star, Users } from 'lucide-react';
+import { BookOpen, Lock, Play, Search, Star } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
