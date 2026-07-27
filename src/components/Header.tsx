@@ -46,7 +46,7 @@ export default function Header() {
               <span className="text-white font-heading font-extrabold text-lg">D</span>
             </div>
             <span className="font-heading font-extrabold text-lg text-secondary-600 dark:text-white hidden sm:block tracking-tight">
-              Skills <span className="text-primary-500">Academy</span>
+              Digital <span className="text-primary-500">Skills</span>
             </span>
           </button>
 

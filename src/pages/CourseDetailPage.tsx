@@ -4,7 +4,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import type { Course, Lesson, Quiz, Review, Enrollment, Progress, Certificate } from '../types';
+import type { Course, Lesson, Quiz, Review, Enrollment, Progress, Certificate, Subscription } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 export default function CourseDetailPage({ courseId }: { courseId: string }) {
@@ -19,6 +19,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [progress, setProgress] = useState<Progress[]>([]);
   const [certificate, setCertificate] = useState<Certificate | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [instructorName, setInstructorName] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'reviews'>('overview');
@@ -57,6 +58,15 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
 
         const { data: certData } = await supabase.from('certificates').select('*').eq('course_id', courseId).eq('user_id', session.user.id).maybeSingle();
         if (certData) setCertificate(certData as Certificate);
+
+        const { data: subData } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (subData) setSubscription(subData as Subscription);
       }
 
       setLoading(false);
@@ -64,6 +74,10 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
   }, [courseId, session]);
 
   const isEnrolled = !!enrollment;
+  // Trainers/admins have no subscription row and get full access.
+  // Students only get full access once their subscription is 'active'
+  // (payment confirmed) — otherwise they get a preview of lesson 1 only.
+  const hasFullAccess = !subscription || subscription.status === 'active';
   const completedLessonIds = useMemo(
     () => new Set(progress.filter((p) => p.completed).map((p) => p.lesson_id)),
     [progress]
@@ -264,11 +278,13 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                 lessons.map((lesson, i) => {
                   const isCompleted = completedLessonIds.has(lesson.id);
                   const lessonQuizzes = quizzes.filter((q) => q.lesson_id === lesson.id);
+                  const isPreviewLesson = i === 0;
+                  const unlocked = isEnrolled && (isPreviewLesson || hasFullAccess);
                   return (
                     <div key={lesson.id} className="card overflow-hidden">
                       <button
-                        onClick={() => isEnrolled ? setActiveLesson(lesson) : null}
-                        className={`w-full flex items-center gap-4 p-4 text-left ${isEnrolled ? 'hover:bg-gray-50 dark:hover:bg-secondary-600 cursor-pointer' : 'cursor-not-allowed'}`}
+                        onClick={() => unlocked ? setActiveLesson(lesson) : null}
+                        className={`w-full flex items-center gap-4 p-4 text-left ${unlocked ? 'hover:bg-gray-50 dark:hover:bg-secondary-600 cursor-pointer' : 'cursor-not-allowed'}`}
                       >
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isCompleted ? 'bg-success-100 dark:bg-success-600/20 text-success-500' : 'bg-primary-100 dark:bg-primary-600/20 text-primary-500'}`}>
                           {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -277,6 +293,9 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-secondary-400">#{i + 1}</span>
                             <h3 className="font-medium text-secondary-600 dark:text-white truncate">{lesson.title}</h3>
+                            {isEnrolled && !hasFullAccess && isPreviewLesson && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400">Aperçu</span>
+                            )}
                           </div>
                           <div className="flex items-center gap-3 text-xs text-secondary-400 mt-1">
                             {lesson.video_url && <span className="flex items-center gap-1"><Video className="w-3 h-3" /> {t('course.video')}</span>}
@@ -285,7 +304,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {lesson.duration}s</span>
                           </div>
                         </div>
-                        {!isEnrolled && <Lock className="w-5 h-5 text-secondary-400 flex-shrink-0" />}
+                        {!unlocked && <Lock className="w-5 h-5 text-secondary-400 flex-shrink-0" />}
                       </button>
                     </div>
                   );
@@ -394,7 +413,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
       </div>
 
       {/* Lesson player modal */}
-      {activeLesson && isEnrolled && (
+      {activeLesson && isEnrolled && (hasFullAccess || lessons.findIndex((l) => l.id === activeLesson.id) === 0) && (
         <LessonPlayer
           lesson={activeLesson}
           quizzes={quizzes.filter((q) => q.lesson_id === activeLesson.id)}

@@ -46,7 +46,6 @@ export default function StudentDashboard() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [subscriptionDaysLeft, setSubscriptionDaysLeft] = useState<number | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentRef, setPaymentRef] = useState('');
   const [paymentNote, setPaymentNote] = useState('');
@@ -151,7 +150,7 @@ export default function StudentDashboard() {
         .maybeSingle();
       if (portData) setPortfolio(portData as Portfolio);
 
-      // 8. current subscription (for trial / payment status)
+      // 8. current subscription (payment status — no free trial)
       const { data: subData } = await supabase
         .from('subscriptions')
         .select('*')
@@ -159,13 +158,7 @@ export default function StudentDashboard() {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (subData) {
-        const sub = subData as Subscription;
-        setSubscription(sub);
-        if (sub.status === 'trial' && sub.end_date) {
-          setSubscriptionDaysLeft(Math.ceil((new Date(sub.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-        }
-      }
+      if (subData) setSubscription(subData as Subscription);
 
       setLoading(false);
     })();
@@ -177,8 +170,6 @@ export default function StudentDashboard() {
 
   // Temporary manual pricing (matches PricingPage) — used while Paystack/Cinetpay are pending validation
   const PLAN_PRICES: Record<string, number> = { starter: 189, professional: 249, expert: 290, bundle: 499, premium: 249, enterprise: 499 };
-
-  const trialDaysLeft = subscriptionDaysLeft;
 
   const handleSubmitPayment = async () => {
     if (!userId || !subscription || !paymentRef.trim()) return;
@@ -248,26 +239,18 @@ export default function StudentDashboard() {
         <DashboardSkeleton />
       ) : (
         <>
-          {subscription?.status === 'trial' && (
-            <div className={`mb-6 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between ${
-              trialDaysLeft !== null && trialDaysLeft <= 0
-                ? 'bg-alert-50 dark:bg-alert-600/10 border border-alert-200 dark:border-alert-600'
-                : 'bg-primary-50 dark:bg-primary-600/10 border border-primary-200 dark:border-primary-600'
-            }`}>
+          {subscription?.status === 'pending_payment' && (
+            <div className="mb-6 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between bg-alert-50 dark:bg-alert-600/10 border border-alert-200 dark:border-alert-600">
               <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  trialDaysLeft !== null && trialDaysLeft <= 0 ? 'bg-alert-500 text-white' : 'bg-primary-500 text-white'
-                }`}>
-                  {trialDaysLeft !== null && trialDaysLeft <= 0 ? <AlertCircle className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-alert-500 text-white">
+                  <AlertCircle className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="font-semibold text-secondary-600 dark:text-white">
-                    {trialDaysLeft !== null && trialDaysLeft <= 0
-                      ? "Votre essai gratuit est terminé"
-                      : `Il vous reste ${trialDaysLeft} jour${trialDaysLeft && trialDaysLeft > 1 ? 's' : ''} d'essai gratuit`}
+                    Paiement en attente de confirmation
                   </p>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100">
-                    Confirmez votre paiement pour garder l'accès à votre plan {subscription.plan}.
+                    Votre accès est limité à un aperçu (1ère leçon de chaque cours) tant que votre paiement pour le plan {subscription.plan} n'est pas confirmé.
                   </p>
                 </div>
               </div>

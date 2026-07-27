@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, ChevronDown, ChevronUp, Target, Heart, Award, Flag } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import type { TranslationKey } from '../i18n/translations';
 
 export function AboutPage() {
@@ -47,11 +49,27 @@ export function AboutPage() {
 
 export function ContactPage() {
   const { t } = useLanguage();
+  const { session } = useAuth();
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (session?.user) {
+      // Logged-in visitors: create a real support ticket the admin team can see and answer.
+      await supabase.from('support_tickets').insert({
+        subject: `Contact form — ${form.name}`,
+        description: `Email: ${form.email}\n\n${form.message}`,
+      });
+    }
+
+    // Also open the visitor's own email client addressed to our support inbox,
+    // since there is no backend email service configured yet.
+    const subject = encodeURIComponent(`Contact Digital Skills — ${form.name}`);
+    const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
+    window.location.href = `mailto:support@liafrik.com?subject=${subject}&body=${body}`;
+
     setSent(true);
     setForm({ name: '', email: '', message: '' });
     setTimeout(() => setSent(false), 5000);
@@ -69,21 +87,21 @@ export function ContactPage() {
               <Mail className="w-6 h-6" />
             </div>
             <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">{t('contact.email')}</h3>
-            <p className="text-sm text-secondary-400 dark:text-neutral-100">contact@liyahgroup.com</p>
+            <p className="text-sm text-secondary-400 dark:text-neutral-100">support@liafrik.com</p>
           </div>
           <div className="card p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <Phone className="w-6 h-6" />
             </div>
             <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">{t('contact.phone')}</h3>
-            <p className="text-sm text-secondary-400 dark:text-neutral-100">+237 6XX XXX XXX</p>
+            <p className="text-sm text-secondary-400 dark:text-neutral-100">+971 4 XXX XXXX</p>
           </div>
           <div className="card p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <MapPin className="w-6 h-6" />
             </div>
             <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">{t('contact.address')}</h3>
-            <p className="text-sm text-secondary-400 dark:text-neutral-100">Douala, Cameroun</p>
+            <p className="text-sm text-secondary-400 dark:text-neutral-100">Dubai, UAE — Head Office</p>
           </div>
         </div>
 

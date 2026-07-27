@@ -56,7 +56,7 @@ const INSTRUCTORS = [
 
 const TESTIMONIALS = [
   {
-    text: "Skills Academy completely transformed my career. Within 4 months of completing the Full-Stack path, I landed a developer role at a top tech company. The portfolio projects gave me real-world experience employers noticed.",
+    text: "Digital Skills completely transformed my career. Within 4 months of completing the Full-Stack path, I landed a developer role at a top tech company. The portfolio projects gave me real-world experience employers noticed.",
     name: 'Amara Diallo',
     role: 'Full-Stack Developer at TechCorp',
     avatar: 'AD',
@@ -68,7 +68,7 @@ const TESTIMONIALS = [
     avatar: 'FB',
   },
   {
-    text: "I switched from a dead-end job to a digital marketing career thanks to Skills Academy. The instructors are industry pros, and the career support connected me with three hiring partners before I even finished.",
+    text: "I switched from a dead-end job to a digital marketing career thanks to Digital Skills. The instructors are industry pros, and the career support connected me with three hiring partners before I even finished.",
     name: 'Kwame Mensah',
     role: 'Marketing Specialist at MarketPro',
     avatar: 'KM',
@@ -486,7 +486,7 @@ export default function LandingPage() {
               {t('section.testimonials')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-300 max-w-2xl mx-auto">
-              Real stories from graduates who built careers with Skills Academy.
+              Real stories from graduates who built careers with Digital Skills.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -588,7 +588,7 @@ export default function LandingPage() {
             Ready to start your career journey?
           </h2>
           <p className="text-primary-100 text-lg mb-8 max-w-2xl mx-auto">
-            Join 50,000+ students building in-demand skills and launching careers with Skills Academy.
+            Join 50,000+ students building in-demand skills and launching careers with Digital Skills.
           </p>
           <button
             onClick={handleGetStarted}

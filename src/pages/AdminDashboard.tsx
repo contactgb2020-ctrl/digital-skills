@@ -9,10 +9,13 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getPrivateFileUrl } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Profile, Course, LocationSuggestion, Subscription, Payment, KycDocument, Category, TrainerEarning, CustomRole, RolePermission, StaffMember, Certificate, EmployerProfile, Coupon, SupportTicket } from '../types';
+import type { Profile, Course, LocationSuggestion, Subscription, Payment, KycDocument, Category, TrainerEarning, CustomRole, RolePermission, StaffMember, Certificate, EmployerProfile, Coupon, SupportTicket, SuperAdminEmail, PayoutRequest } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
-const SUPER_ADMIN_EMAILS = ['vincentnogue2@gmail.com', 'vincentnogue@yahoo.com', 'webdxb1@gmail.com'];
+// Bootstrap fallback only — used if the DB whitelist hasn't loaded yet, so a
+// legitimate super admin is never locked out. The real, editable whitelist
+// lives in the `super_admin_emails` table (see 'roles' tab).
+const BOOTSTRAP_SUPER_ADMIN_EMAILS = ['vincentnogue2@gmail.com', 'vincentnogue@yahoo.com', 'liyahjoha@gmail.com', 'webdxb1@gmail.com'];
 const PERMISSION_KEYS = [
   'view_users', 'edit_users', 'manage_courses', 'validate_kyc',
   'manage_payments', 'view_stats', 'manage_roles', 'manage_categories', 'manage_plans',
@@ -22,7 +25,7 @@ export default function AdminDashboard() {
   const { t } = useLanguage();
   const { profile } = useAuth();
 
-  if (!profile || profile.role !== 'super_admin' || !SUPER_ADMIN_EMAILS.includes(profile.email)) {
+  if (!profile || profile.role !== 'super_admin') {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md">
@@ -50,6 +53,9 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
   const [search, setSearch] = useState('');
   const [instructorNames, setInstructorNames] = useState<Record<string, string>>({});
   const [superAdminCount, setSuperAdminCount] = useState(0);
+  const [superAdminEmails, setSuperAdminEmails] = useState<SuperAdminEmail[]>([]);
+  const [newSuperAdminEmail, setNewSuperAdminEmail] = useState('');
+  const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
 
   // KYC state
@@ -104,6 +110,12 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
         setUsers(usersData as Profile[]);
         setSuperAdminCount((usersData as Profile[]).filter((u) => u.role === 'super_admin').length);
       }
+
+      const { data: saEmails } = await supabase.from('super_admin_emails').select('*').order('created_at', { ascending: true });
+      if (saEmails) setSuperAdminEmails(saEmails as SuperAdminEmail[]);
+
+      const { data: payoutData } = await supabase.from('payout_requests').select('*').order('created_at', { ascending: false });
+      if (payoutData) setPayoutRequests(payoutData as PayoutRequest[]);
 
       const { data: courseData } = await supabase.from('courses').select('*').order('created_at', { ascending: false });
       if (courseData) {
@@ -264,8 +276,9 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
       setErrorMsg(t('admin.min_admins_error'));
       return;
     }
-    // If promoting to super_admin, check whitelist
-    if (newRole === 'super_admin' && !SUPER_ADMIN_EMAILS.includes(user.email)) {
+    // If promoting to super_admin, check whitelist (DB-backed, falls back to bootstrap list)
+    const whitelist = superAdminEmails.length > 0 ? superAdminEmails.map((e) => e.email) : BOOTSTRAP_SUPER_ADMIN_EMAILS;
+    if (newRole === 'super_admin' && !whitelist.includes(user.email)) {
       setErrorMsg(t('admin.email_whitelist'));
       return;
     }
@@ -276,7 +289,33 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
     }
     setUsers(users.map((u) => (u.id === user.id ? { ...u, role: newRole } : u)));
     setSuperAdminCount(users.filter((u) => u.role === 'super_admin' && u.id !== user.id).length + (newRole === 'super_admin' ? 1 : 0));
-  }, [users, superAdminCount, t]);
+  }, [users, superAdminCount, superAdminEmails, t]);
+
+  const addSuperAdminEmail = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    const email = newSuperAdminEmail.trim().toLowerCase();
+    if (!email) return;
+    const { data, error } = await supabase.from('super_admin_emails').insert({ email }).select().single();
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+    if (data) setSuperAdminEmails([...superAdminEmails, data as SuperAdminEmail]);
+    setNewSuperAdminEmail('');
+  }, [newSuperAdminEmail, superAdminEmails]);
+
+  const removeSuperAdminEmail = useCallback(async (email: string, isProtected: boolean) => {
+    if (isProtected) return;
+    if (!confirm(t('admin.confirm_delete_user'))) return;
+    setErrorMsg('');
+    const { error } = await supabase.from('super_admin_emails').delete().eq('email', email);
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+    setSuperAdminEmails(superAdminEmails.filter((e) => e.email !== email));
+  }, [superAdminEmails, t]);
 
   const deleteUser = useCallback(async (id: string, role: string) => {
     setErrorMsg('');
@@ -340,6 +379,14 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
         .eq('id', payment.subscription_id);
       setSubscriptions((prev) => prev.map((s) => (s.id === payment.subscription_id ? { ...s, status: 'active', end_date: newEndDate.toISOString() } : s)));
     }
+  }, []);
+
+  const processPayoutRequest = useCallback(async (request: PayoutRequest, newStatus: 'paid' | 'rejected') => {
+    await supabase
+      .from('payout_requests')
+      .update({ status: newStatus, processed_at: new Date().toISOString() })
+      .eq('id', request.id);
+    setPayoutRequests((prev) => prev.map((p) => (p.id === request.id ? { ...p, status: newStatus, processed_at: new Date().toISOString() } : p)));
   }, []);
 
   const createRole = useCallback(async (e: React.FormEvent) => {
@@ -542,7 +589,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                               {user.role === 'trainer' && (
                                 <button onClick={() => changeRole(user, 'student')} className="text-xs text-secondary-400 hover:underline">{t('admin.make_student')}</button>
                               )}
-                              {user.role !== 'super_admin' && SUPER_ADMIN_EMAILS.includes(user.email) && (
+                              {user.role !== 'super_admin' && (superAdminEmails.length > 0 ? superAdminEmails.map((e) => e.email) : BOOTSTRAP_SUPER_ADMIN_EMAILS).includes(user.email) && (
                                 <button onClick={() => changeRole(user, 'super_admin')} className="text-xs text-alert-500 hover:underline">{t('admin.make_admin')}</button>
                               )}
                               {user.role !== 'super_admin' && (
@@ -776,6 +823,40 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {/* ROLES */}
           {tab === 'roles' && (
             <div className="space-y-6">
+              <div className="card p-6">
+                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary-500" /> Emails autorisés — Super Admin
+                </h3>
+                <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
+                  Seuls ces emails peuvent être promus Super Admin. Les emails protégés ne peuvent jamais être retirés.
+                </p>
+                <form onSubmit={addSuperAdminEmail} className="flex gap-2 mb-4 max-w-lg">
+                  <input
+                    type="email"
+                    required
+                    value={newSuperAdminEmail}
+                    onChange={(e) => setNewSuperAdminEmail(e.target.value)}
+                    placeholder="nouvel.email@exemple.com"
+                    className="input-field flex-1"
+                  />
+                  <button type="submit" className="btn-primary whitespace-nowrap">Ajouter</button>
+                </form>
+                <div className="space-y-2">
+                  {superAdminEmails.map((e) => (
+                    <div key={e.email} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
+                      <span className="text-sm text-secondary-600 dark:text-white">{e.email}</span>
+                      {e.protected ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400">Protégé</span>
+                      ) : (
+                        <button onClick={() => removeSuperAdminEmail(e.email, e.protected)} className="text-xs text-alert-500 hover:underline flex items-center gap-1">
+                          <Trash2 className="w-3 h-3" /> Retirer
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <form onSubmit={createRole} className="card p-6 flex gap-3 items-end max-w-lg">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('admin.role_name')}</label>
@@ -937,6 +1018,50 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                               <button onClick={() => confirmManualPayment(p)} className="btn-primary text-xs py-1.5 px-3">
                                 Confirmer
                               </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {payoutRequests.some((p) => p.status === 'pending') && (
+                <div className="card p-6">
+                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                    <Wallet className="w-5 h-5 text-primary-500" /> Demandes de retrait formateurs
+                  </h3>
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
+                    Vérifiez les coordonnées puis effectuez le virement/Mobile Money manuellement avant de marquer "Payé".
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-secondary-600 dark:bg-secondary-800 text-white">
+                        <tr>
+                          <th className="text-left p-3 text-sm font-medium">Montant</th>
+                          <th className="text-left p-3 text-sm font-medium">Méthode</th>
+                          <th className="text-left p-3 text-sm font-medium">Coordonnées</th>
+                          <th className="text-left p-3 text-sm font-medium">Date</th>
+                          <th className="text-left p-3 text-sm font-medium">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {payoutRequests.filter((p) => p.status === 'pending').map((p) => (
+                          <tr key={p.id} className="border-b border-slate-100 dark:border-secondary-500">
+                            <td className="p-3 text-sm font-semibold text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
+                            <td className="p-3 text-sm text-secondary-600 dark:text-neutral-100">{p.method === 'mobile_money' ? 'Mobile Money' : 'Virement bancaire'}</td>
+                            <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100 max-w-xs whitespace-pre-wrap">{p.account_details}</td>
+                            <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{new Date(p.created_at).toLocaleDateString()}</td>
+                            <td className="p-3">
+                              <div className="flex gap-2">
+                                <button onClick={() => processPayoutRequest(p, 'paid')} className="btn-primary text-xs py-1.5 px-3">
+                                  Payé
+                                </button>
+                                <button onClick={() => processPayoutRequest(p, 'rejected')} className="text-xs py-1.5 px-3 rounded-lg bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400">
+                                  Rejeter
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}

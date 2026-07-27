@@ -276,18 +276,14 @@ export default function SignupPage() {
       if (selectedRole === 'trainer') {
         // No subscription created for trainers
       } else {
-        // Student: create annual subscription with 7-day trial
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 7); // 7-day trial
-        const annualEnd = new Date();
-        annualEnd.setFullYear(annualEnd.getFullYear() + 1);
-
+        // Student: no free trial — subscription starts as pending_payment
+        // until an admin confirms the manual payment (see StudentDashboard).
         await supabase.from('subscriptions').insert({
           user_id: user.id,
           plan: selectedPlan,
-          status: 'trial',
+          status: 'pending_payment',
           start_date: new Date().toISOString(),
-          end_date: endDate.toISOString(),
+          end_date: null,
         });
       }
     }

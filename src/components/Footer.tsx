@@ -24,7 +24,7 @@ export default function Footer() {
                 <span className="text-white font-heading font-bold text-lg">D</span>
               </div>
               <span className="font-heading font-bold text-lg">
-                Skills <span className="text-primary-400">Academy</span>
+                Digital <span className="text-primary-400">Skills</span>
               </span>
             </div>
             <p className="text-secondary-200 text-sm mb-3">{t('footer.tagline')}</p>
@@ -57,18 +57,19 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold mb-4">{t('footer.made_in_cameroon')}</h4>
+            <h4 className="font-heading font-semibold mb-4">{t('footer.made_in_africa')}</h4>
             <p className="text-sm text-secondary-200 mb-2">
               {t('footer.liyah_group')} — {t('footer.tagline')}
             </p>
-            <div className="flex items-center gap-1 text-2xl">
-              <span title="Cameroun">🇨🇲</span>
+            <div className="flex items-center gap-2 text-2xl">
+              <span title="Dubai, UAE — Head Office">🇦🇪</span>
+              <span title="Africa">🌍</span>
             </div>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-secondary-500 text-center text-sm text-secondary-200">
-          &copy; {new Date().getFullYear()} Digital Skills Africa — {t('footer.liyah_group')}. {t('footer.rights')}
+          &copy; {new Date().getFullYear()} Digital Skills — {t('footer.liyah_group')}. {t('footer.rights')}
         </div>
       </div>
     </footer>

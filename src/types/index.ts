@@ -1,7 +1,7 @@
 export type UserRole = 'student' | 'trainer' | 'super_admin';
 
 export type SubscriptionPlan = 'starter' | 'professional' | 'expert' | 'bundle' | 'premium' | 'enterprise';
-export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'cancelled';
+export type SubscriptionStatus = 'trial' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
 
 export type CourseStatus = 'draft' | 'pending_review' | 'published' | 'rejected';
 export type KycStatus = 'unverified' | 'pending' | 'approved' | 'rejected';
@@ -132,6 +132,25 @@ export interface Progress {
   completed: boolean;
   completed_at: string | null;
   created_at: string;
+}
+
+export interface SuperAdminEmail {
+  email: string;
+  protected: boolean;
+  added_by?: string | null;
+  created_at: string;
+}
+
+export interface PayoutRequest {
+  id: string;
+  trainer_id: string;
+  amount: number;
+  method: 'mobile_money' | 'bank_transfer';
+  account_details: string;
+  status: 'pending' | 'paid' | 'rejected';
+  admin_note?: string | null;
+  created_at: string;
+  processed_at?: string | null;
 }
 
 export interface Certificate {

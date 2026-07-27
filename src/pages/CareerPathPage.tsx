@@ -437,9 +437,9 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
                 DSA
               </div>
-              <h3 className="font-semibold text-secondary-600 text-lg">Skills Academy Team</h3>
+              <h3 className="font-semibold text-secondary-600 text-lg">Digital Skills Team</h3>
               <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-                This career path is curated and maintained by the Skills Academy team of industry
+                This career path is curated and maintained by the Digital Skills team of industry
                 practitioners and educators.
               </p>
             </div>

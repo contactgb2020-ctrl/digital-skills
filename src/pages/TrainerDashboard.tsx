@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown, ChevronRight, Trash2, Edit3, Star, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Layers, MessageSquare, Megaphone, Building2 } from 'lucide-react';
+import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, X, ChevronDown, ChevronRight, Trash2, Edit3, Star, Send, HelpCircle, Video, FileText, Wallet, DollarSign, TrendingUp, Layers, MessageSquare, Megaphone, Building2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { uploadFile } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
-import type { Course, Lesson, Review, Category, TrainerEarning } from '../types';
+import type { Course, Lesson, Review, Category, TrainerEarning, PayoutRequest } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
@@ -37,6 +37,13 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [earnings, setEarnings] = useState<TrainerEarning[]>([]);
+  const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
+  const [showPayoutModal, setShowPayoutModal] = useState(false);
+  const [payoutMethod, setPayoutMethod] = useState<'mobile_money' | 'bank_transfer'>('mobile_money');
+  const [payoutDetails, setPayoutDetails] = useState('');
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutSubmitting, setPayoutSubmitting] = useState(false);
+  const [payoutSubmitted, setPayoutSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -77,6 +84,9 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
       const { data: earnData } = await supabase.from('trainer_earnings').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
       if (earnData) setEarnings(earnData as TrainerEarning[]);
+
+      const { data: payoutData } = await supabase.from('payout_requests').select('*').eq('trainer_id', session.user.id).order('created_at', { ascending: false });
+      if (payoutData) setPayoutRequests(payoutData as PayoutRequest[]);
 
       const { data } = await supabase.from('courses').select('*').eq('created_by', session.user.id).order('created_at', { ascending: false });
       if (data) {
@@ -266,6 +276,29 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const totalWatchHours = earnings.reduce((s, e) => s + Number(e.total_watch_hours), 0);
   const pendingPayment = earnings.filter((e) => e.status === 'pending').reduce((s, e) => s + Number(e.amount_due), 0);
   const paidAmount = earnings.filter((e) => e.status === 'paid').reduce((s, e) => s + Number(e.amount_due), 0);
+  const withdrawnOrRequested = payoutRequests.filter((p) => p.status !== 'rejected').reduce((s, p) => s + Number(p.amount), 0);
+  const availableBalance = Math.max(0, paidAmount - withdrawnOrRequested);
+
+  const handleRequestPayout = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session?.user) return;
+    const amount = parseFloat(payoutAmount);
+    if (!amount || amount <= 0 || amount > availableBalance || !payoutDetails.trim()) return;
+    setPayoutSubmitting(true);
+    const { data, error } = await supabase.from('payout_requests').insert({
+      trainer_id: session.user.id,
+      amount,
+      method: payoutMethod,
+      account_details: payoutDetails.trim(),
+    }).select().single();
+    setPayoutSubmitting(false);
+    if (!error && data) {
+      setPayoutRequests([data as PayoutRequest, ...payoutRequests]);
+      setPayoutSubmitted(true);
+      setPayoutAmount('');
+      setPayoutDetails('');
+    }
+  }, [session, payoutAmount, payoutMethod, payoutDetails, availableBalance, payoutRequests]);
 
   return (
     <DashboardLayout title={`${t('dashboard.welcome')}, ${profile.nom}`} items={sidebarItems} currentRoute="/trainer" userRole={profile.role}>
@@ -540,6 +573,39 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 <StatCard icon={<CheckCircle className="w-6 h-6" />} label={t('trainer.amount_paid')} value={`$${paidAmount.toFixed(2)}`} color="success" />
               </div>
 
+              <div className="card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-secondary-400 dark:text-neutral-100">Solde disponible pour retrait</p>
+                  <p className="text-2xl font-bold text-secondary-600 dark:text-white">${availableBalance.toFixed(2)}</p>
+                </div>
+                <button
+                  onClick={() => { setShowPayoutModal(true); setPayoutSubmitted(false); setPayoutAmount(''); setPayoutDetails(''); }}
+                  disabled={availableBalance <= 0}
+                  className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Wallet className="w-4 h-4" /> Demander un retrait
+                </button>
+              </div>
+
+              {payoutRequests.length > 0 && (
+                <div className="card p-6">
+                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">Mes demandes de retrait</h3>
+                  <div className="space-y-2">
+                    {payoutRequests.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
+                        <div className="text-sm">
+                          <span className="text-secondary-600 dark:text-white font-medium">${Number(p.amount).toFixed(2)}</span>
+                          <span className="text-xs text-secondary-400 dark:text-neutral-100 ml-2">{p.method === 'mobile_money' ? 'Mobile Money' : 'Virement bancaire'} — {new Date(p.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${p.status === 'paid' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : p.status === 'rejected' ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400'}`}>
+                          {p.status === 'paid' ? 'Payé' : p.status === 'rejected' ? 'Rejeté' : 'En attente'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="card p-6">
                 <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.earnings_history')}</h3>
                 {earnings.length === 0 ? (
@@ -663,6 +729,82 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
             </div>
           )}
         </>
+      )}
+
+      {showPayoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setShowPayoutModal(false)}>
+          <div className="card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-secondary-600 dark:text-white">Demander un retrait</h3>
+              <button onClick={() => setShowPayoutModal(false)} className="text-secondary-400 hover:text-secondary-600 dark:hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {payoutSubmitted ? (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-success-100 dark:bg-success-600/20 flex items-center justify-center">
+                  <CheckCircle className="w-7 h-7 text-success-500" />
+                </div>
+                <p className="font-semibold text-secondary-600 dark:text-white mb-1">Demande envoyée</p>
+                <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
+                  Notre équipe traite votre demande manuellement et vous contactera pour le versement.
+                </p>
+                <button onClick={() => setShowPayoutModal(false)} className="btn-primary w-full">Fermer</button>
+              </div>
+            ) : (
+              <form onSubmit={handleRequestPayout} className="space-y-4">
+                <p className="text-sm text-secondary-400 dark:text-neutral-100">
+                  Solde disponible : <span className="font-semibold text-secondary-600 dark:text-white">${availableBalance.toFixed(2)}</span>
+                </p>
+
+                <div>
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Montant à retirer ($)</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max={availableBalance}
+                    step="0.01"
+                    value={payoutAmount}
+                    onChange={(e) => setPayoutAmount(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">Méthode</label>
+                  <select value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value as 'mobile_money' | 'bank_transfer')} className="input-field">
+                    <option value="mobile_money">Mobile Money (Orange, MTN, Wave)</option>
+                    <option value="bank_transfer">Virement bancaire</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">
+                    {payoutMethod === 'mobile_money' ? 'Numéro Mobile Money' : 'IBAN / coordonnées bancaires'}
+                  </label>
+                  <textarea
+                    required
+                    rows={2}
+                    value={payoutDetails}
+                    onChange={(e) => setPayoutDetails(e.target.value)}
+                    placeholder={payoutMethod === 'mobile_money' ? 'Ex: +225 07 00 00 00 00' : 'Nom de la banque, IBAN, titulaire du compte'}
+                    className="input-field"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={payoutSubmitting || availableBalance <= 0}
+                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {payoutSubmitting ? 'Envoi...' : 'Envoyer la demande'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
       )}
     </DashboardLayout>
   );
