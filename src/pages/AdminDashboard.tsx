@@ -963,7 +963,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                         <tr key={sub.id} className="border-b border-gray-100 dark:border-secondary-500">
                           <td className="p-4 text-sm text-secondary-600 dark:text-white capitalize">{sub.plan}</td>
                           <td className="p-4">
-                            <span className={`px-2 py-0.5 rounded-full text-xs ${sub.status === 'active' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : sub.status === 'trial' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400'}`}>
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${sub.status === 'active' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : sub.status === 'pending_payment' ? 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400' : sub.status === 'trial' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400'}`}>
                               {sub.status}
                             </span>
                           </td>

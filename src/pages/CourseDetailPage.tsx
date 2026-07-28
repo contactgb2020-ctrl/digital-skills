@@ -151,7 +151,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
 
   const handleGenerateCertificate = useCallback(async () => {
     if (!session?.user || !course) return;
-    const certNumber = `DSA-${courseId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+    const certNumber = `DS-${courseId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
     const { data } = await supabase.from('certificates').insert({
       user_id: session.user.id,
       course_id: course.id,

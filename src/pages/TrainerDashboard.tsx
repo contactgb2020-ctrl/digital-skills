@@ -276,8 +276,11 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
   const totalWatchHours = earnings.reduce((s, e) => s + Number(e.total_watch_hours), 0);
   const pendingPayment = earnings.filter((e) => e.status === 'pending').reduce((s, e) => s + Number(e.amount_due), 0);
   const paidAmount = earnings.filter((e) => e.status === 'paid').reduce((s, e) => s + Number(e.amount_due), 0);
-  const withdrawnOrRequested = payoutRequests.filter((p) => p.status !== 'rejected').reduce((s, p) => s + Number(p.amount), 0);
-  const availableBalance = Math.max(0, paidAmount - withdrawnOrRequested);
+  // Available balance = what the trainer has earned but not yet been paid (pending),
+  // minus anything already requested (pending or paid payout requests), so the
+  // same earnings can't be withdrawn twice.
+  const alreadyRequested = payoutRequests.filter((p) => p.status !== 'rejected').reduce((s, p) => s + Number(p.amount), 0);
+  const availableBalance = Math.max(0, pendingPayment - alreadyRequested);
 
   const handleRequestPayout = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
