@@ -169,7 +169,7 @@ export default function StudentDashboard() {
   const categories = ['all', ...Array.from(new Set(careerPaths.map((p) => p.category).filter(Boolean)))];
 
   // Temporary manual pricing (matches PricingPage) — used while Paystack/Cinetpay are pending validation
-  const PLAN_PRICES: Record<string, number> = { starter: 189, professional: 249, expert: 290, bundle: 499, premium: 249, enterprise: 499 };
+  const PLAN_PRICES: Record<string, number> = { starter: 189, professional: 249, expert: 290, bundle: 499 };
 
   const handleSubmitPayment = async () => {
     if (!userId || !subscription || !paymentRef.trim()) return;

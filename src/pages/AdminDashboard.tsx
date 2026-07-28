@@ -183,7 +183,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
       if (staffData) setStaffMembers(staffData as StaffMember[]);
 
       // Revenue by plan (from completed payments joined with subscriptions)
-      const planRevenue: Record<string, number> = { starter: 0, premium: 0, enterprise: 0 };
+      const planRevenue: Record<string, number> = { starter: 0, professional: 0, expert: 0, bundle: 0 };
       // Sum completed payments per plan via subscription lookup
       const subById: Record<string, Subscription> = {};
       (subData as Subscription[] || []).forEach((s) => { subById[s.id] = s; });
@@ -427,7 +427,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
   );
 
   const filteredKyc = kycFilter === 'all' ? kycDocs : kycDocs.filter((d) => d.status === kycFilter);
-  const planCounts: Record<string, number> = { starter: 0, premium: 0, enterprise: 0 };
+  const planCounts: Record<string, number> = { starter: 0, professional: 0, expert: 0, bundle: 0 };
   subscriptions.forEach((s) => { planCounts[s.plan] = (planCounts[s.plan] || 0) + 1; });
   const roleCounts: Record<string, number> = { student: 0, trainer: 0, super_admin: 0 };
   users.forEach((u) => { roleCounts[u.role] = (roleCounts[u.role] || 0) + 1; });
@@ -512,7 +512,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 <div className="card p-6">
                   <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('admin.plan_distribution')}</h3>
                   <div className="space-y-3">
-                    {(['starter', 'premium', 'enterprise'] as const).map((plan) => {
+                    {(['starter', 'professional', 'expert', 'bundle'] as const).map((plan) => {
                       const count = planCounts[plan] || 0;
                       const pct = subscriptions.length > 0 ? (count / subscriptions.length) * 100 : 0;
                       return (
@@ -939,7 +939,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {tab === 'subscriptions' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {(['starter', 'premium', 'enterprise'] as const).map((plan) => (
+                {(['starter', 'professional', 'expert', 'bundle'] as const).map((plan) => (
                   <div key={plan} className="card p-6 text-center">
                     <div className="text-3xl font-bold text-primary-500 mb-1">{planCounts[plan] || 0}</div>
                     <div className="text-sm text-secondary-400 dark:text-neutral-100 capitalize">{plan}</div>
@@ -981,11 +981,12 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {/* REVENUE */}
           {tab === 'revenue' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
                 <StatCard icon={<DollarSign className="w-6 h-6" />} label={t('admin.revenue_total')} value={totalRevenue} prefix="$" />
                 <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Starter" value={revenueByPlan['starter'] || 0} prefix="$" />
-                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Premium" value={revenueByPlan['premium'] || 0} prefix="$" />
-                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Enterprise" value={revenueByPlan['enterprise'] || 0} prefix="$" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Professional" value={revenueByPlan['professional'] || 0} prefix="$" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Expert" value={revenueByPlan['expert'] || 0} prefix="$" />
+                <StatCard icon={<TrendingUp className="w-6 h-6" />} label="Bundle" value={revenueByPlan['bundle'] || 0} prefix="$" />
               </div>
 
               {payments.some((p) => p.status === 'pending') && (
@@ -1076,7 +1077,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                   <PieChart className="w-5 h-5 text-primary-500" /> Subscription Revenue Breakdown
                 </h3>
                 <div className="space-y-3">
-                  {(['starter', 'premium', 'enterprise'] as const).map((plan) => {
+                  {(['starter', 'professional', 'expert', 'bundle'] as const).map((plan) => {
                     const amt = revenueByPlan[plan] || 0;
                     const pct = totalRevenue > 0 ? (amt / totalRevenue) * 100 : 0;
                     return (

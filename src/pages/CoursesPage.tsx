@@ -50,7 +50,7 @@ export default function CoursesPage() {
   }, [session]);
 
   const plan = subscription?.plan || 'starter';
-  const isPremium = plan === 'premium' || plan === 'enterprise';
+  const isPremium = plan === 'expert' || plan === 'bundle';
 
   const filtered = courses.filter((c) => {
     const matchesSearch = !search || c.title.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase());

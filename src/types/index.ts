@@ -1,6 +1,6 @@
 export type UserRole = 'student' | 'trainer' | 'super_admin';
 
-export type SubscriptionPlan = 'starter' | 'professional' | 'expert' | 'bundle' | 'premium' | 'enterprise';
+export type SubscriptionPlan = 'starter' | 'professional' | 'expert' | 'bundle';
 export type SubscriptionStatus = 'trial' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
 
 export type CourseStatus = 'draft' | 'pending_review' | 'published' | 'rejected';
