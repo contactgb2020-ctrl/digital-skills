@@ -40,7 +40,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
         if (instructor) setInstructorName((instructor as { nom: string }).nom);
       }
 
-      const { data: lessonData } = await supabase.from('lessons').select('*').eq('course_id', courseId).order('order_number', { ascending: true });
+      const { data: lessonData } = await supabase.from('lessons_gated').select('*').eq('course_id', courseId).order('order_number', { ascending: true });
       if (lessonData) setLessons(lessonData as Lesson[]);
 
       const { data: quizData } = await supabase.from('quizzes').select('*').in('lesson_id', (lessonData || []).map((l: Lesson) => l.id));
