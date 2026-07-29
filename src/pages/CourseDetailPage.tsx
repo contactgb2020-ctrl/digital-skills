@@ -4,6 +4,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { useRouter } from '../router/Router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getPrivateFileUrl } from '../lib/upload';
 import type { Course, Lesson, Quiz, Review, Enrollment, Progress, Certificate, Subscription } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
 
@@ -462,6 +463,26 @@ function LessonPlayer({
   t: (k: TKey) => string;
   userId?: string;
 }) {
+  const [videoSignedUrl, setVideoSignedUrl] = useState<string | null>(null);
+  const [docSignedUrl, setDocSignedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setVideoSignedUrl(null);
+      setDocSignedUrl(null);
+      if (lesson.video_url) {
+        const url = await getPrivateFileUrl('course-videos', lesson.video_url);
+        if (active) setVideoSignedUrl(url);
+      }
+      if (lesson.document_url) {
+        const url = await getPrivateFileUrl('course-videos', lesson.document_url);
+        if (active) setDocSignedUrl(url);
+      }
+    })();
+    return () => { active = false; };
+  }, [lesson.id, lesson.video_url, lesson.document_url]);
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
       <div className="bg-white dark:bg-secondary-700 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -472,10 +493,10 @@ function LessonPlayer({
           </div>
 
           {/* Video */}
-          {lesson.video_url && (
+          {videoSignedUrl && (
             <div className="mb-4 rounded-xl overflow-hidden bg-black aspect-video">
               <video
-                src={lesson.video_url}
+                src={videoSignedUrl}
                 controls
                 className="w-full h-full"
                 onTimeUpdate={(e) => {
@@ -496,8 +517,8 @@ function LessonPlayer({
           )}
 
           {/* Document */}
-          {lesson.document_url && (
-            <a href={lesson.document_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-lg bg-primary-50 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 mb-4 hover:bg-primary-100 transition-colors">
+          {docSignedUrl && (
+            <a href={docSignedUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-lg bg-primary-50 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 mb-4 hover:bg-primary-100 transition-colors">
               <FileText className="w-5 h-5" /> {t('course.document')} — PDF
             </a>
           )}

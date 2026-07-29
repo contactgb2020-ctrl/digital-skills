@@ -3,7 +3,7 @@ import { BookOpen, Plus, BarChart3, Users, Clock, CheckCircle, XCircle, X, Chevr
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { uploadFile } from '../lib/upload';
+import { uploadFile, uploadPrivateFile } from '../lib/upload';
 import DashboardLayout from '../components/DashboardLayout';
 import type { Course, Lesson, Review, Category, TrainerEarning, PayoutRequest } from '../types';
 import type { TranslationKey as TKey } from '../i18n/translations';
@@ -215,10 +215,10 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
     let videoUrl = '';
     if (lessonForm.videoFile) {
       setUploading(true);
-      const { url, error: upErr } = await uploadFile('course-videos', lessonForm.videoFile, session.user.id);
+      const { path, error: upErr } = await uploadPrivateFile('course-videos', lessonForm.videoFile, session.user.id);
       setUploading(false);
       if (upErr) { alert(upErr); return; }
-      videoUrl = url || '';
+      videoUrl = path || '';
     }
 
     const { data } = await supabase.from('lessons').insert({
