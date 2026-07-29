@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, ChevronDown, ChevronUp, Target, Heart, Award, Flag } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ChevronDown, ChevronUp, Target, Heart, Award, Flag, Headset, Globe2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -68,7 +68,7 @@ export function ContactPage() {
     // since there is no backend email service configured yet.
     const subject = encodeURIComponent(`Contact Digital Skills — ${form.name}`);
     const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
-    window.location.href = `mailto:support@liafrik.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:cs@liafrik.com?cc=support@liafrik.com&subject=${subject}&body=${body}`;
 
     setSent(true);
     setForm({ name: '', email: '', message: '' });
@@ -79,14 +79,24 @@ export function ContactPage() {
     <div className="pt-16 min-h-screen bg-neutral-light dark:bg-secondary-700">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h1 className="text-4xl font-bold text-secondary-600 dark:text-white mb-3 text-center">{t('contact.title')}</h1>
-        <p className="text-center text-secondary-400 dark:text-neutral-100 mb-12">{t('footer.liyah_group')} — {t('footer.tagline')}</p>
+        <p className="text-center text-secondary-400 dark:text-neutral-100 mb-2">{t('footer.liyah_group')} — {t('footer.tagline')}</p>
+        <p className="flex items-center justify-center gap-1.5 text-sm text-secondary-400 dark:text-neutral-100 mb-12">
+          <Globe2 className="w-4 h-4" /> Support international — nous répondons partout en Afrique et au-delà
+        </p>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="card p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <Mail className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">{t('contact.email')}</h3>
+            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">Service client</h3>
+            <p className="text-sm text-secondary-400 dark:text-neutral-100">cs@liafrik.com</p>
+          </div>
+          <div className="card p-6 text-center">
+            <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
+              <Headset className="w-6 h-6" />
+            </div>
+            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">Support technique</h3>
             <p className="text-sm text-secondary-400 dark:text-neutral-100">support@liafrik.com</p>
           </div>
           <div className="card p-6 text-center">
@@ -141,6 +151,11 @@ export function TermsPage() {
     { titleKey: 'terms.s4_title', bodyKey: 'terms.s4_body' },
     { titleKey: 'terms.s5_title', bodyKey: 'terms.s5_body' },
     { titleKey: 'terms.s6_title', bodyKey: 'terms.s6_body' },
+    { titleKey: 'terms.s8_title', bodyKey: 'terms.s8_body' },
+    { titleKey: 'terms.s9_title', bodyKey: 'terms.s9_body' },
+    { titleKey: 'terms.s10_title', bodyKey: 'terms.s10_body' },
+    { titleKey: 'terms.s11_title', bodyKey: 'terms.s11_body' },
+    { titleKey: 'terms.s12_title', bodyKey: 'terms.s12_body' },
     { titleKey: 'terms.s7_title', bodyKey: 'terms.s7_body' },
   ];
 
@@ -172,6 +187,10 @@ export function PrivacyPage() {
     { titleKey: 'privacy.s4_title', bodyKey: 'privacy.s4_body' },
     { titleKey: 'privacy.s5_title', bodyKey: 'privacy.s5_body' },
     { titleKey: 'privacy.s6_title', bodyKey: 'privacy.s6_body' },
+    { titleKey: 'privacy.s7_title', bodyKey: 'privacy.s7_body' },
+    { titleKey: 'privacy.s8_title', bodyKey: 'privacy.s8_body' },
+    { titleKey: 'privacy.s9_title', bodyKey: 'privacy.s9_body' },
+    { titleKey: 'privacy.s10_title', bodyKey: 'privacy.s10_body' },
   ];
 
   return (
