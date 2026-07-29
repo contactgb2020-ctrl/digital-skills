@@ -171,6 +171,22 @@ export default function StudentDashboard() {
   // Temporary manual pricing (matches PricingPage) — used while Paystack/Cinetpay are pending validation
   const PLAN_PRICES: Record<string, number> = { starter: 189, professional: 249, expert: 290, bundle: 499 };
 
+  const [stripeLoading, setStripeLoading] = useState(false);
+
+  const handlePayWithStripe = async () => {
+    if (!subscription) return;
+    setStripeLoading(true);
+    const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+      body: { plan: subscription.plan },
+    });
+    setStripeLoading(false);
+    if (error || !data?.url) {
+      alert("Le paiement par carte n'est pas encore disponible. Merci d'utiliser une autre méthode ci-dessous.");
+      return;
+    }
+    window.location.href = data.url;
+  };
+
   const handleSubmitPayment = async () => {
     if (!userId || !subscription || !paymentRef.trim()) return;
     setPaymentSubmitting(true);
@@ -354,8 +370,24 @@ export default function StudentDashboard() {
             ) : (
               <>
                 <div className="mb-4 p-3 rounded-lg bg-primary-50 dark:bg-primary-600/10 border border-primary-200 dark:border-primary-600 text-sm text-secondary-600 dark:text-neutral-100">
-                  <p className="font-semibold mb-2">Plan {subscription.plan} — ${PLAN_PRICES[subscription.plan] || 0}/an</p>
-                  <p className="mb-1">Le paiement en ligne (Paystack / CinetPay) arrive bientôt. En attendant, effectuez le règlement via :</p>
+                  <p className="font-semibold">Plan {subscription.plan} — ${PLAN_PRICES[subscription.plan] || 0}/an</p>
+                </div>
+
+                <button
+                  onClick={handlePayWithStripe}
+                  disabled={stripeLoading}
+                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 mb-4"
+                >
+                  <CreditCard className="w-4 h-4" /> {stripeLoading ? 'Redirection...' : 'Payer par carte (sécurisé)'}
+                </button>
+
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-secondary-500" /></div>
+                  <div className="relative flex justify-center text-xs"><span className="bg-white dark:bg-secondary-700 px-2 text-secondary-400">ou paiement manuel</span></div>
+                </div>
+
+                <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-secondary-600 text-sm text-secondary-600 dark:text-neutral-100">
+                  <p className="mb-1">Mobile Money / virement (Paystack Mobile Money arrive bientôt) :</p>
                   <ul className="list-disc list-inside space-y-0.5">
                     <li>Mobile Money (Orange, MTN, Wave) : <span className="font-medium">[numéro à ajouter par l'admin]</span></li>
                     <li>Virement bancaire : <span className="font-medium">[RIB à ajouter par l'admin]</span></li>
@@ -385,9 +417,9 @@ export default function StudentDashboard() {
                 <button
                   onClick={handleSubmitPayment}
                   disabled={!paymentRef.trim() || paymentSubmitting}
-                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {paymentSubmitting ? 'Envoi...' : 'Confirmer mon paiement'}
+                  {paymentSubmitting ? 'Envoi...' : "J'ai payé manuellement — confirmer"}
                 </button>
               </>
             )}
