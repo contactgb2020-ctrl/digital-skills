@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* Glacial Indifference — self-hosted (not available via Google Fonts).
+   Drop your licensed font files into /public/fonts/ using these exact
+   names, and this will activate automatically:
+     - GlacialIndifference-Regular.woff2  (weight 400, body text)
+     - GlacialIndifference-Medium.woff2   (weight 500, headings/accents)
+   Until then, the fallback stack below (Poppins-like geometric sans via
+   system-ui/Segoe UI/Helvetica) keeps the site looking clean. */
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('/fonts/GlacialIndifference-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('/fonts/GlacialIndifference-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -13,19 +33,19 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-extrabold tracking-tight;
+    @apply font-heading font-medium tracking-tight;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 text-white px-6 py-3 rounded-[10px] font-semibold hover:bg-primary-600 active:scale-95 transition-all duration-200;
+    @apply bg-primary-500 text-white px-6 py-3 rounded-[10px] font-medium hover:bg-primary-600 active:scale-95 transition-all duration-200;
   }
   .btn-secondary {
-    @apply bg-secondary-600 text-white px-6 py-3 rounded-[10px] font-semibold hover:bg-secondary-500 active:scale-95 transition-all duration-200;
+    @apply bg-secondary-600 text-white px-6 py-3 rounded-[10px] font-medium hover:bg-secondary-500 active:scale-95 transition-all duration-200;
   }
   .btn-outline {
-    @apply border-2 border-primary-500 text-primary-500 px-6 py-3 rounded-[10px] font-semibold hover:bg-primary-50 dark:hover:bg-secondary-600 active:scale-95 transition-all duration-200;
+    @apply border-2 border-primary-500 text-primary-500 px-6 py-3 rounded-[10px] font-medium hover:bg-primary-50 dark:hover:bg-secondary-600 active:scale-95 transition-all duration-200;
   }
   .card {
     @apply bg-white dark:bg-secondary-700 rounded-2xl border border-slate-100 dark:border-secondary-500 transition-all duration-300;
@@ -37,7 +57,7 @@
     @apply text-secondary-600 dark:text-neutral-100 hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-200;
   }
   .pill-badge {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 dark:bg-secondary-600 text-primary-500 text-sm font-semibold;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 dark:bg-secondary-600 text-primary-500 text-sm font-medium;
   }
   .hero-gradient {
     background: linear-gradient(180deg, #E8EEE8 0%, #FFFFFF 100%);

@@ -115,8 +115,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        heading: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"Glacial Indifference"', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        heading: ['"Glacial Indifference"', '"Segoe UI"', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         'xl': '10px',

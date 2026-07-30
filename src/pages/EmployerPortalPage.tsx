@@ -369,7 +369,7 @@ export default function EmployerPortalPage() {
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-heading font-extrabold text-secondary-600 dark:text-white">
+              <h1 className="text-2xl font-heading font-medium text-secondary-600 dark:text-white">
                 {t('employer.title')}
               </h1>
               <p className="text-sm text-secondary-400 dark:text-neutral-100">
@@ -384,7 +384,7 @@ export default function EmployerPortalPage() {
               <button
                 key={tb.key}
                 onClick={() => setTab(tb.key)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-sm font-semibold transition-all ${
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-sm font-medium transition-all ${
                   tab === tb.key
                     ? 'bg-primary-500 text-white shadow-sm'
                     : 'bg-slate-50 dark:bg-secondary-600 text-secondary-600 dark:text-neutral-100 hover:bg-slate-100 dark:hover:bg-secondary-500'
@@ -433,7 +433,7 @@ export default function EmployerPortalPage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
                   <Search className="w-10 h-10 text-primary-500" />
                 </div>
-                <p className="text-secondary-600 dark:text-white font-semibold mb-1">
+                <p className="text-secondary-600 dark:text-white font-medium mb-1">
                   {t('employer.no_candidates')}
                 </p>
                 <p className="text-sm text-secondary-400 dark:text-neutral-100">
@@ -455,13 +455,13 @@ export default function EmployerPortalPage() {
                             loading="lazy"
                           />
                         ) : (
-                          <span className="text-primary-500 font-bold text-lg">
+                          <span className="text-primary-500 font-medium text-lg">
                             {g.nom.charAt(0).toUpperCase()}
                           </span>
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-heading font-semibold text-secondary-600 dark:text-white truncate">
+                        <h3 className="font-heading font-medium text-secondary-600 dark:text-white truncate">
                           {g.nom}
                         </h3>
                         <p className="text-xs text-secondary-400 dark:text-neutral-100 truncate">
@@ -508,7 +508,7 @@ export default function EmployerPortalPage() {
                       <button
                         onClick={() => saveCandidate(g.id)}
                         disabled={savedIds.has(g.id)}
-                        className={`text-sm px-4 py-2 rounded-[10px] font-semibold inline-flex items-center justify-center gap-1.5 transition-all ${
+                        className={`text-sm px-4 py-2 rounded-[10px] font-medium inline-flex items-center justify-center gap-1.5 transition-all ${
                           savedIds.has(g.id)
                             ? 'bg-success-500 text-white cursor-default'
                             : 'btn-primary'
@@ -546,7 +546,7 @@ export default function EmployerPortalPage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
                   <Users className="w-10 h-10 text-primary-500" />
                 </div>
-                <p className="text-secondary-600 dark:text-white font-semibold mb-1">
+                <p className="text-secondary-600 dark:text-white font-medium mb-1">
                   {t('employer.no_candidates')}
                 </p>
                 <button
@@ -570,13 +570,13 @@ export default function EmployerPortalPage() {
                             loading="lazy"
                           />
                         ) : (
-                          <span className="text-primary-500 font-bold text-lg">
+                          <span className="text-primary-500 font-medium text-lg">
                             {(c.student?.nom || '?').charAt(0).toUpperCase()}
                           </span>
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-heading font-semibold text-secondary-600 dark:text-white truncate">
+                        <h3 className="font-heading font-medium text-secondary-600 dark:text-white truncate">
                           {c.student?.nom || '—'}
                         </h3>
                         <p className="text-xs text-secondary-400 dark:text-neutral-100 truncate">
@@ -612,7 +612,7 @@ export default function EmployerPortalPage() {
                       </button>
                       <button
                         onClick={() => removeCandidate(c.id, c.student_id)}
-                        className="text-sm px-4 py-2 rounded-[10px] font-semibold border-2 border-red-300 text-red-500 hover:bg-red-50 dark:hover:bg-secondary-600 active:scale-95 transition-all inline-flex items-center justify-center gap-1.5"
+                        className="text-sm px-4 py-2 rounded-[10px] font-medium border-2 border-red-300 text-red-500 hover:bg-red-50 dark:hover:bg-secondary-600 active:scale-95 transition-all inline-flex items-center justify-center gap-1.5"
                       >
                         <X className="w-4 h-4" />
                         {t('employer.remove_candidate')}
@@ -634,7 +634,7 @@ export default function EmployerPortalPage() {
                   <Award className="w-5 h-5 text-primary-500" />
                 </div>
                 <div>
-                  <h2 className="font-heading font-bold text-secondary-600 dark:text-white">
+                  <h2 className="font-heading font-medium text-secondary-600 dark:text-white">
                     {t('employer.verify_cert_id')}
                   </h2>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100">
@@ -678,7 +678,7 @@ export default function EmployerPortalPage() {
                     <div className="rounded-2xl border border-success-200 bg-success-50 dark:bg-success-600/10 p-6">
                       <div className="flex items-center gap-2 mb-4">
                         <CheckCircle className="w-6 h-6 text-success-500" />
-                        <h3 className="font-heading font-bold text-success-600 dark:text-success-400">
+                        <h3 className="font-heading font-medium text-success-600 dark:text-success-400">
                           {t('employer.cert_valid')}
                         </h3>
                       </div>
@@ -687,7 +687,7 @@ export default function EmployerPortalPage() {
                           <dt className="text-xs font-medium text-secondary-400 dark:text-neutral-100 uppercase tracking-wide">
                             {t('cert.holder')}
                           </dt>
-                          <dd className="text-secondary-600 dark:text-white font-semibold mt-0.5">
+                          <dd className="text-secondary-600 dark:text-white font-medium mt-0.5">
                             {certResult.data.holder_name}
                           </dd>
                         </div>
@@ -695,7 +695,7 @@ export default function EmployerPortalPage() {
                           <dt className="text-xs font-medium text-secondary-400 dark:text-neutral-100 uppercase tracking-wide">
                             {t('cert.id')}
                           </dt>
-                          <dd className="text-secondary-600 dark:text-white font-semibold mt-0.5 font-mono text-sm break-all">
+                          <dd className="text-secondary-600 dark:text-white font-medium mt-0.5 font-mono text-sm break-all">
                             {certResult.data.certificate_number || certResult.data.id}
                           </dd>
                         </div>
@@ -703,7 +703,7 @@ export default function EmployerPortalPage() {
                           <dt className="text-xs font-medium text-secondary-400 dark:text-neutral-100 uppercase tracking-wide">
                             {t('employer.path')}
                           </dt>
-                          <dd className="text-secondary-600 dark:text-white font-semibold mt-0.5">
+                          <dd className="text-secondary-600 dark:text-white font-medium mt-0.5">
                             {certResult.data.path_title || '—'}
                           </dd>
                         </div>
@@ -711,7 +711,7 @@ export default function EmployerPortalPage() {
                           <dt className="text-xs font-medium text-secondary-400 dark:text-neutral-100 uppercase tracking-wide">
                             {t('cert.completion_date')}
                           </dt>
-                          <dd className="text-secondary-600 dark:text-white font-semibold mt-0.5">
+                          <dd className="text-secondary-600 dark:text-white font-medium mt-0.5">
                             {formatDate(certResult.data.created_at)}
                           </dd>
                         </div>
@@ -719,7 +719,7 @@ export default function EmployerPortalPage() {
                           <dt className="text-xs font-medium text-secondary-400 dark:text-neutral-100 uppercase tracking-wide">
                             {t('cert.score')}
                           </dt>
-                          <dd className="text-secondary-600 dark:text-white font-semibold mt-0.5 inline-flex items-center gap-1">
+                          <dd className="text-secondary-600 dark:text-white font-medium mt-0.5 inline-flex items-center gap-1">
                             <Star className="w-4 h-4 text-primary-500" />
                             {certResult.data.score != null ? `${certResult.data.score}%` : '—'}
                           </dd>
@@ -734,7 +734,7 @@ export default function EmployerPortalPage() {
                     <div className="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-600/10 p-6">
                       <div className="flex items-center gap-2">
                         <XCircle className="w-6 h-6 text-red-500" />
-                        <h3 className="font-heading font-bold text-red-600 dark:text-red-400">
+                        <h3 className="font-heading font-medium text-red-600 dark:text-red-400">
                           {t('employer.cert_invalid')}
                         </h3>
                       </div>

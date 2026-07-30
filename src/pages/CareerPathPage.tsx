@@ -201,7 +201,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
       <div className="pt-16 min-h-screen bg-sage-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <Layers className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-secondary-600 mb-2">Career path not found</h2>
+          <h2 className="text-2xl font-medium text-secondary-600 mb-2">Career path not found</h2>
           <p className="text-slate-500 mb-6">The career path you're looking for doesn't exist or has been moved.</p>
           <button onClick={() => navigate('/')} className="btn-primary inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" /> {t('common.back')}
@@ -248,7 +248,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-secondary-600 font-heading mb-3">
+              <h1 className="text-3xl lg:text-4xl font-medium text-secondary-600 font-heading mb-3">
                 {path.title}
               </h1>
               <p className="text-slate-500 text-lg leading-relaxed mb-6">{path.description}</p>
@@ -313,7 +313,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
           {activeTab === 'overview' && (
             <div className="card p-6 lg:p-8 animate-fade-in space-y-6">
               <section>
-                <h2 className="text-xl font-heading font-semibold text-secondary-600 mb-3">
+                <h2 className="text-xl font-heading font-medium text-secondary-600 mb-3">
                   {t('career.overview')}
                 </h2>
                 <p className="text-slate-500 leading-relaxed whitespace-pre-line">
@@ -323,7 +323,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
 
               {path.required_skills?.length > 0 && (
                 <section>
-                  <h3 className="font-semibold text-secondary-600 mb-3">{t('career.skills')}</h3>
+                  <h3 className="font-medium text-secondary-600 mb-3">{t('career.skills')}</h3>
                   <div className="flex flex-wrap gap-2">
                     {path.required_skills.map((skill) => (
                       <span
@@ -339,7 +339,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
 
               {path.learning_outcomes?.length > 0 && (
                 <section>
-                  <h3 className="font-semibold text-secondary-600 mb-3">{t('career.outcomes')}</h3>
+                  <h3 className="font-medium text-secondary-600 mb-3">{t('career.outcomes')}</h3>
                   <ul className="space-y-2">
                     {path.learning_outcomes.map((outcome, i) => (
                       <li key={i} className="flex items-start gap-2 text-slate-500">
@@ -365,10 +365,10 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
                 modules.map((mod, mi) => (
                   <div key={`${mod.module_order}-${mod.module_name}`} className="card overflow-hidden">
                     <div className="flex items-center gap-3 px-5 py-4 bg-sage-50 border-b border-slate-100">
-                      <div className="w-9 h-9 rounded-lg bg-primary-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      <div className="w-9 h-9 rounded-lg bg-primary-500 text-white flex items-center justify-center font-medium text-sm flex-shrink-0">
                         {mi + 1}
                       </div>
-                      <h3 className="font-semibold text-secondary-600">{mod.module_name}</h3>
+                      <h3 className="font-medium text-secondary-600">{mod.module_name}</h3>
                       <span className="ml-auto text-xs text-slate-500">
                         {mod.courses.length} {t('career.courses')}
                       </span>
@@ -401,7 +401,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
                     <Layers className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-secondary-600 mb-1">Project {i + 1}</h3>
+                    <h3 className="font-medium text-secondary-600 mb-1">Project {i + 1}</h3>
                     <p className="text-slate-500 text-sm">{project}</p>
                   </div>
                 </div>
@@ -412,7 +412,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
           {/* Career opportunities */}
           {activeTab === 'opportunities' && (
             <div className="card p-6 lg:p-8 animate-fade-in">
-              <h2 className="text-xl font-heading font-semibold text-secondary-600 mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-heading font-medium text-secondary-600 mb-4 flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-primary-500" />
                 {t('career.opportunities')}
               </h2>
@@ -434,10 +434,10 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
           {/* Instructor */}
           {activeTab === 'instructor' && (
             <div className="card p-6 lg:p-8 animate-fade-in text-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-2xl font-medium mx-auto mb-4">
                 DSA
               </div>
-              <h3 className="font-semibold text-secondary-600 text-lg">Digital Skills Team</h3>
+              <h3 className="font-medium text-secondary-600 text-lg">Digital Skills Team</h3>
               <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
                 This career path is curated and maintained by the Digital Skills team of industry
                 practitioners and educators.
@@ -480,7 +480,7 @@ export default function CareerPathPage({ pathSlug }: { pathSlug: string }) {
         <div className="space-y-4">
           <div className="card p-6 sticky top-20">
             <div className="mb-4">
-              <div className="text-3xl font-bold text-secondary-600">{priceFormatted}</div>
+              <div className="text-3xl font-medium text-secondary-600">{priceFormatted}</div>
               {path.price_cents > 0 && (
                 <p className="text-sm text-slate-500 mt-1">One-time payment · lifetime access</p>
               )}

@@ -262,7 +262,7 @@ export default function StudentDashboard() {
                   <AlertCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-secondary-600 dark:text-white">
+                  <p className="font-medium text-secondary-600 dark:text-white">
                     Paiement en attente de confirmation
                   </p>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100">
@@ -350,7 +350,7 @@ export default function StudentDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setShowPaymentModal(false)}>
           <div className="card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-secondary-600 dark:text-white">Confirmer mon paiement</h3>
+              <h3 className="text-lg font-medium text-secondary-600 dark:text-white">Confirmer mon paiement</h3>
               <button onClick={() => setShowPaymentModal(false)} className="text-secondary-400 hover:text-secondary-600 dark:hover:text-white">
                 <X className="w-5 h-5" />
               </button>
@@ -361,7 +361,7 @@ export default function StudentDashboard() {
                 <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-success-100 dark:bg-success-600/20 flex items-center justify-center">
                   <CheckCircle className="w-7 h-7 text-success-500" />
                 </div>
-                <p className="font-semibold text-secondary-600 dark:text-white mb-1">Paiement en cours de vérification</p>
+                <p className="font-medium text-secondary-600 dark:text-white mb-1">Paiement en cours de vérification</p>
                 <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
                   Nous confirmons votre paiement manuellement sous 24h. Votre accès reste actif pendant la vérification.
                 </p>
@@ -370,7 +370,7 @@ export default function StudentDashboard() {
             ) : (
               <>
                 <div className="mb-4 p-3 rounded-lg bg-primary-50 dark:bg-primary-600/10 border border-primary-200 dark:border-primary-600 text-sm text-secondary-600 dark:text-neutral-100">
-                  <p className="font-semibold">Plan {subscription.plan} — ${PLAN_PRICES[subscription.plan] || 0}/an</p>
+                  <p className="font-medium">Plan {subscription.plan} — ${PLAN_PRICES[subscription.plan] || 0}/an</p>
                 </div>
 
                 <button
@@ -473,7 +473,7 @@ function OverviewTab({
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
         <div className="absolute -right-4 top-10 w-24 h-24 rounded-full bg-white/10" />
         <div className="relative">
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1">
+          <h2 className="text-2xl sm:text-3xl font-medium tracking-tight mb-1">
             {t('dashboard.welcome')}, {studentName} 👋
           </h2>
           <p className="text-white/80 text-sm sm:text-base max-w-md">
@@ -493,7 +493,7 @@ function OverviewTab({
       {/* Resume learning */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-secondary-600 dark:text-white flex items-center gap-2">
+          <h3 className="text-lg font-medium text-secondary-600 dark:text-white flex items-center gap-2">
             <Play className="w-5 h-5 text-primary-500" /> {t('student.resume')}
           </h3>
         </div>
@@ -502,7 +502,7 @@ function OverviewTab({
             <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
               <BookOpen className="w-8 h-8 text-primary-500" />
             </div>
-            <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('student.no_paths')}</p>
+            <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('student.no_paths')}</p>
             <p className="text-sm text-slate-500 dark:text-neutral-100 mb-4">{t('student.no_paths_desc')}</p>
             <button onClick={onExplore} className="btn-primary text-sm">{t('student.explore_paths')}</button>
           </div>
@@ -520,10 +520,10 @@ function OverviewTab({
                   )}
                 </div>
                 <div className="p-4">
-                  <h4 className="font-semibold text-secondary-600 dark:text-white line-clamp-1 mb-2">{course!.title}</h4>
+                  <h4 className="font-medium text-secondary-600 dark:text-white line-clamp-1 mb-2">{course!.title}</h4>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-slate-500 dark:text-neutral-100">{t('dashboard.progress')}</span>
-                    <span className="text-primary-500 font-semibold">{enrollment.progress_pct}%</span>
+                    <span className="text-primary-500 font-medium">{enrollment.progress_pct}%</span>
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-secondary-600 mb-3">
                     <div className="h-full rounded-full bg-primary-500 transition-all duration-500" style={{ width: `${enrollment.progress_pct}%` }} />
@@ -540,7 +540,7 @@ function OverviewTab({
 
       {/* Upcoming lessons */}
       <section>
-        <h3 className="text-lg font-bold text-secondary-600 dark:text-white flex items-center gap-2 mb-4">
+        <h3 className="text-lg font-medium text-secondary-600 dark:text-white flex items-center gap-2 mb-4">
           <Calendar className="w-5 h-5 text-primary-500" /> {t('student.upcoming')}
         </h3>
         {upcoming.length === 0 ? (
@@ -568,7 +568,7 @@ function OverviewTab({
 
       {/* Recent achievements */}
       <section>
-        <h3 className="text-lg font-bold text-secondary-600 dark:text-white flex items-center gap-2 mb-4">
+        <h3 className="text-lg font-medium text-secondary-600 dark:text-white flex items-center gap-2 mb-4">
           <Star className="w-5 h-5 text-primary-500" /> {t('student.achievements')}
         </h3>
         {achievements.length === 0 ? (
@@ -610,7 +610,7 @@ function MyPathsTab({ enrollments, enrolledCourses, onContinue, onExplore }: MyP
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
           <BookOpen className="w-10 h-10 text-primary-500" />
         </div>
-        <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('student.no_paths')}</p>
+        <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('student.no_paths')}</p>
         <p className="text-sm text-slate-500 dark:text-neutral-100 mb-4">{t('student.no_paths_desc')}</p>
         <button onClick={onExplore} className="btn-primary">{t('student.explore_paths')}</button>
       </div>
@@ -641,11 +641,11 @@ function MyPathsTab({ enrollments, enrolledCourses, onContinue, onExplore }: MyP
             </div>
             <div className="p-5">
               <span className="text-xs font-medium text-primary-500">{course.category}</span>
-              <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-2 line-clamp-2">{course.title}</h3>
+              <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-2 line-clamp-2">{course.title}</h3>
               <div className="mb-3">
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-slate-500 dark:text-neutral-100">{t('dashboard.progress')}</span>
-                  <span className="text-primary-500 font-semibold">{progress}%</span>
+                  <span className="text-primary-500 font-medium">{progress}%</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-secondary-600">
                   <div className="h-full rounded-full bg-primary-500 transition-all duration-500" style={{ width: `${progress}%` }} />
@@ -706,7 +706,7 @@ function ExplorePathsTab({
           <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
             <Layers className="w-10 h-10 text-primary-500" />
           </div>
-          <p className="text-secondary-600 dark:text-white font-semibold">{t('student.no_paths')}</p>
+          <p className="text-secondary-600 dark:text-white font-medium">{t('student.no_paths')}</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -737,7 +737,7 @@ function ExplorePathsTab({
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <span className="text-xs font-medium text-primary-500 mb-1">{path.category}</span>
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 line-clamp-1">{path.title}</h3>
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1 line-clamp-1">{path.title}</h3>
                   <p className="text-sm text-slate-500 dark:text-neutral-100 line-clamp-2 mb-3">{path.description}</p>
                   <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-neutral-100 mb-4">
                     <span className="flex items-center gap-1"><Target className="w-3.5 h-3.5" /> {path.level}</span>
@@ -776,7 +776,7 @@ function CertificatesTab({ certificates, certCourses, onDownload }: Certificates
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
           <Award className="w-10 h-10 text-primary-500" />
         </div>
-        <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('student.cert_earned')}</p>
+        <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('student.cert_earned')}</p>
         <p className="text-sm text-slate-500 dark:text-neutral-100">{t('student.no_certificates')}</p>
       </div>
     );
@@ -791,7 +791,7 @@ function CertificatesTab({ certificates, certCourses, onDownload }: Certificates
             <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
               <Award className="w-8 h-8 text-white" />
             </div>
-            <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 line-clamp-1">
+            <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1 line-clamp-1">
               {course?.title || t('student.formation')}
             </h3>
             <p className="text-xs text-slate-500 dark:text-neutral-100 mb-1">
@@ -828,7 +828,7 @@ function BookmarksTab({ bookmarks, onOpenCourse }: BookmarksProps) {
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
           <Bookmark className="w-10 h-10 text-primary-500" />
         </div>
-        <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('student.bookmarks')}</p>
+        <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('student.bookmarks')}</p>
         <p className="text-sm text-slate-500 dark:text-neutral-100">No bookmarks yet. Save lessons while learning to find them here.</p>
       </div>
     );
@@ -874,7 +874,7 @@ function WishlistTab({ wishlist, onView, onRemove }: WishlistProps) {
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
           <Heart className="w-10 h-10 text-primary-500" />
         </div>
-        <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('student.wishlist')}</p>
+        <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('student.wishlist')}</p>
         <p className="text-sm text-slate-500 dark:text-neutral-100">No wishlisted paths yet. Tap the heart on a career path to save it.</p>
       </div>
     );
@@ -898,7 +898,7 @@ function WishlistTab({ wishlist, onView, onRemove }: WishlistProps) {
             </div>
             <div className="p-5 flex flex-col flex-1">
               <span className="text-xs font-medium text-primary-500 mb-1">{path.category}</span>
-              <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-3 line-clamp-1">{path.title}</h3>
+              <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-3 line-clamp-1">{path.title}</h3>
               <div className="flex gap-2 mt-auto">
                 <button onClick={() => onView(path.slug)} className="btn-primary flex-1 text-sm py-2 flex items-center justify-center gap-1">
                   {t('student.explore_paths')} <ChevronRight className="w-4 h-4" />
@@ -941,7 +941,7 @@ function PortfolioTab({ portfolio, userId, onViewPublic, onEdit }: PortfolioProp
             <Briefcase className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h3 className="font-heading font-bold text-secondary-600 dark:text-white">{t('portfolio.title')}</h3>
+            <h3 className="font-heading font-medium text-secondary-600 dark:text-white">{t('portfolio.title')}</h3>
             <p className="text-sm text-slate-500 dark:text-neutral-100">
               {portfolio ? portfolio.headline || t('portfolio.bio') : t('portfolio.no_projects')}
             </p>
@@ -955,7 +955,7 @@ function PortfolioTab({ portfolio, userId, onViewPublic, onEdit }: PortfolioProp
             )}
             {portfolio.skills.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">{t('portfolio.skills')}</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">{t('portfolio.skills')}</p>
                 <div className="flex flex-wrap gap-2">
                   {portfolio.skills.map((s, i) => (
                     <span key={i} className="pill-badge bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400 px-3 py-1 text-sm">{s}</span>
@@ -1003,7 +1003,7 @@ function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value:
   return (
     <div className="card p-5">
       <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center ${c.text} mb-3`}>{icon}</div>
-      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{value}</div>
+      <div className="text-2xl font-medium text-secondary-600 dark:text-white">{value}</div>
       <div className="text-sm text-slate-500 dark:text-neutral-100">{label}</div>
     </div>
   );

@@ -14,7 +14,7 @@ export function AboutPage() {
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
             <Flag className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-secondary-600 dark:text-white mb-3">{t('about.title')}</h1>
+          <h1 className="text-4xl font-medium text-secondary-600 dark:text-white mb-3">{t('about.title')}</h1>
           <p className="text-lg text-secondary-400 dark:text-neutral-100">{t('about.description')}</p>
         </div>
 
@@ -23,14 +23,14 @@ export function AboutPage() {
             <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-4">
               <Target className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('about.mission')}</h2>
+            <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-3">{t('about.mission')}</h2>
             <p className="text-secondary-400 dark:text-neutral-100">{t('about.mission_text')}</p>
           </div>
           <div className="card p-8">
             <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-4">
               <Heart className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('about.values')}</h2>
+            <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-3">{t('about.values')}</h2>
             <p className="text-secondary-400 dark:text-neutral-100">{t('about.values_text')}</p>
           </div>
         </div>
@@ -38,7 +38,7 @@ export function AboutPage() {
         <div className="card p-8 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-secondary-600 dark:to-secondary-800">
           <div className="flex items-center gap-3 mb-4">
             <Award className="w-8 h-8 text-primary-500" />
-            <h2 className="text-2xl font-heading font-bold text-secondary-600 dark:text-white">{t('footer.liyah_group')}</h2>
+            <h2 className="text-2xl font-heading font-medium text-secondary-600 dark:text-white">{t('footer.liyah_group')}</h2>
           </div>
           <p className="text-secondary-400 dark:text-neutral-100">{t('about.liyah_text')}</p>
         </div>
@@ -78,7 +78,7 @@ export function ContactPage() {
   return (
     <div className="pt-16 min-h-screen bg-neutral-light dark:bg-secondary-700">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-secondary-600 dark:text-white mb-3 text-center">{t('contact.title')}</h1>
+        <h1 className="text-4xl font-medium text-secondary-600 dark:text-white mb-3 text-center">{t('contact.title')}</h1>
         <p className="text-center text-secondary-400 dark:text-neutral-100 mb-2">{t('footer.liyah_group')} — {t('footer.tagline')}</p>
         <p className="flex items-center justify-center gap-1.5 text-sm text-secondary-400 dark:text-neutral-100 mb-12">
           <Globe2 className="w-4 h-4" /> Support international — nous répondons partout en Afrique et au-delà
@@ -89,28 +89,28 @@ export function ContactPage() {
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <Mail className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">Service client</h3>
+            <h3 className="font-medium text-secondary-600 dark:text-white mb-1">Service client</h3>
             <p className="text-sm text-secondary-400 dark:text-neutral-100">cs@liafrik.com</p>
           </div>
           <div className="card p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <Headset className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">Support technique</h3>
+            <h3 className="font-medium text-secondary-600 dark:text-white mb-1">Support technique</h3>
             <p className="text-sm text-secondary-400 dark:text-neutral-100">support@liafrik.com</p>
           </div>
           <div className="card p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <Phone className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">{t('contact.phone')}</h3>
+            <h3 className="font-medium text-secondary-600 dark:text-white mb-1">{t('contact.phone')}</h3>
             <p className="text-sm text-secondary-400 dark:text-neutral-100">+971 4 XXX XXXX</p>
           </div>
           <div className="card p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">
               <MapPin className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">{t('contact.address')}</h3>
+            <h3 className="font-medium text-secondary-600 dark:text-white mb-1">{t('contact.address')}</h3>
             <p className="text-sm text-secondary-400 dark:text-neutral-100">Dubai, UAE — Head Office</p>
           </div>
         </div>
@@ -162,13 +162,13 @@ export function TermsPage() {
   return (
     <div className="pt-16 min-h-screen bg-neutral-light dark:bg-secondary-700">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-secondary-600 dark:text-white mb-3">{t('terms.title')}</h1>
+        <h1 className="text-4xl font-medium text-secondary-600 dark:text-white mb-3">{t('terms.title')}</h1>
         <p className="text-secondary-400 dark:text-neutral-100 mb-8">{t('terms.updated')} {new Date().toLocaleDateString()}</p>
 
         <div className="card p-8 space-y-6 text-secondary-400 dark:text-neutral-100 leading-relaxed">
           {sections.map((s, i) => (
             <section key={i}>
-              <h2 className="text-xl font-heading font-semibold text-secondary-600 dark:text-white mb-2">{t(s.titleKey)}</h2>
+              <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-2">{t(s.titleKey)}</h2>
               <p>{t(s.bodyKey)}</p>
             </section>
           ))}
@@ -196,13 +196,13 @@ export function PrivacyPage() {
   return (
     <div className="pt-16 min-h-screen bg-neutral-light dark:bg-secondary-700">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-secondary-600 dark:text-white mb-3">{t('privacy.title')}</h1>
+        <h1 className="text-4xl font-medium text-secondary-600 dark:text-white mb-3">{t('privacy.title')}</h1>
         <p className="text-secondary-400 dark:text-neutral-100 mb-8">{t('privacy.updated')} {new Date().toLocaleDateString()}</p>
 
         <div className="card p-8 space-y-6 text-secondary-400 dark:text-neutral-100 leading-relaxed">
           {sections.map((s, i) => (
             <section key={i}>
-              <h2 className="text-xl font-heading font-semibold text-secondary-600 dark:text-white mb-2">{t(s.titleKey)}</h2>
+              <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-2">{t(s.titleKey)}</h2>
               <p>{t(s.bodyKey)}</p>
             </section>
           ))}
@@ -230,7 +230,7 @@ export function FaqPage() {
   return (
     <div className="pt-16 min-h-screen bg-neutral-light dark:bg-secondary-700">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-secondary-600 dark:text-white mb-3 text-center">{t('faq.title')}</h1>
+        <h1 className="text-4xl font-medium text-secondary-600 dark:text-white mb-3 text-center">{t('faq.title')}</h1>
         <p className="text-center text-secondary-400 dark:text-neutral-100 mb-12">{t('footer.liyah_group')} — {t('footer.tagline')}</p>
 
         <div className="space-y-3">

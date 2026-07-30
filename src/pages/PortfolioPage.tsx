@@ -252,7 +252,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-secondary-600 flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-secondary-400" />
           </div>
-          <h2 className="text-xl font-heading font-bold text-secondary-600 dark:text-white mb-2">
+          <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-2">
             {t('portfolio.title')}
           </h2>
           <p className="text-secondary-400 dark:text-neutral-100 mb-6">
@@ -277,7 +277,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-secondary-600 flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-secondary-400" />
           </div>
-          <h2 className="text-xl font-heading font-bold text-secondary-600 dark:text-white mb-2">
+          <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-2">
             {t('portfolio.title')}
           </h2>
           <p className="text-secondary-400 dark:text-neutral-100 mb-6">
@@ -346,7 +346,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
 
             {/* Name + headline + bio */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-secondary-600 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-heading font-medium text-secondary-600 dark:text-white">
                 {displayName}
               </h1>
               {portfolio.headline && (
@@ -392,7 +392,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
           <div className="card p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Star className="w-5 h-5 text-primary-500" />
-              <h2 className="text-lg font-heading font-semibold text-secondary-600 dark:text-white">
+              <h2 className="text-lg font-heading font-medium text-secondary-600 dark:text-white">
                 {t('portfolio.skills')}
               </h2>
             </div>
@@ -414,7 +414,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
           <div className="card p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Briefcase className="w-5 h-5 text-primary-500" />
-              <h2 className="text-lg font-heading font-semibold text-secondary-600 dark:text-white">
+              <h2 className="text-lg font-heading font-medium text-secondary-600 dark:text-white">
                 {t('portfolio.experience')}
               </h2>
             </div>
@@ -427,7 +427,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
                     {/* Dot */}
                     <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-primary-500 border-4 border-sage-50 dark:border-secondary-700" />
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                      <h3 className="font-semibold text-secondary-600 dark:text-white">
+                      <h3 className="font-medium text-secondary-600 dark:text-white">
                         {exp.title}
                         {exp.company && (
                           <span className="text-secondary-400 dark:text-neutral-100 font-normal">
@@ -459,7 +459,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Folder className="w-5 h-5 text-primary-500" />
-            <h2 className="text-lg font-heading font-semibold text-secondary-600 dark:text-white">
+            <h2 className="text-lg font-heading font-medium text-secondary-600 dark:text-white">
               {t('portfolio.projects')}
             </h2>
           </div>
@@ -495,7 +495,7 @@ export default function PortfolioPage({ userId }: { userId: string }) {
 
                   {/* Body */}
                   <div className="p-5">
-                    <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">
+                    <h3 className="font-medium text-secondary-600 dark:text-white mb-1">
                       {proj.title}
                     </h3>
                     {proj.description && (

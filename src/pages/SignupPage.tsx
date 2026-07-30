@@ -304,7 +304,7 @@ export default function SignupPage() {
             {steps.map((s, i) => (
               <div key={s} className="flex items-center flex-1 last:flex-none">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm transition-all ${
                     step >= s
                       ? 'bg-primary-500 text-white'
                       : 'bg-gray-200 dark:bg-secondary-500 text-secondary-400'
@@ -329,7 +329,7 @@ export default function SignupPage() {
           {/* Step 1: Info */}
           {step === 1 && (
             <form onSubmit={handleStep1Next} className="space-y-4 animate-fade-in">
-              <h2 className="text-xl font-bold text-secondary-600 dark:text-white mb-4">{t('onboarding.step1')}</h2>
+              <h2 className="text-xl font-medium text-secondary-600 dark:text-white mb-4">{t('onboarding.step1')}</h2>
 
               <div>
                 <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('auth.name')}</label>
@@ -370,7 +370,7 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-secondary-400 dark:text-neutral-100">
                 {t('auth.has_account')}{' '}
-                <button type="button" onClick={() => navigate('/login')} className="text-primary-500 font-semibold hover:underline">
+                <button type="button" onClick={() => navigate('/login')} className="text-primary-500 font-medium hover:underline">
                   {t('auth.login.button')}
                 </button>
               </p>
@@ -380,7 +380,7 @@ export default function SignupPage() {
           {/* Step 2: Role choice */}
           {step === 2 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-xl font-bold text-secondary-600 dark:text-white mb-4">{t('signup.role_choice')}</h2>
+              <h2 className="text-xl font-medium text-secondary-600 dark:text-white mb-4">{t('signup.role_choice')}</h2>
               <div className="space-y-3">
                 <button
                   type="button"
@@ -392,7 +392,7 @@ export default function SignupPage() {
                       <GraduationCap className="w-6 h-6" />
                     </div>
                     <div>
-                      <div className="font-semibold text-secondary-600 dark:text-white">{t('signup.role_learner')}</div>
+                      <div className="font-medium text-secondary-600 dark:text-white">{t('signup.role_learner')}</div>
                       <div className="text-sm text-secondary-400 dark:text-neutral-100">{t('signup.role_learner_desc')}</div>
                     </div>
                     {selectedRole === 'student' && <CheckCircle className="w-6 h-6 text-primary-500 ml-auto" />}
@@ -408,7 +408,7 @@ export default function SignupPage() {
                       <BookOpen className="w-6 h-6" />
                     </div>
                     <div>
-                      <div className="font-semibold text-secondary-600 dark:text-white">{t('signup.role_trainer')}</div>
+                      <div className="font-medium text-secondary-600 dark:text-white">{t('signup.role_trainer')}</div>
                       <div className="text-sm text-secondary-400 dark:text-neutral-100">{t('signup.role_trainer_desc')}</div>
                     </div>
                     {selectedRole === 'trainer' && <CheckCircle className="w-6 h-6 text-primary-500 ml-auto" />}
@@ -437,7 +437,7 @@ export default function SignupPage() {
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <Layers className="w-5 h-5 text-primary-500" />
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">Choisissez votre filière</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">Choisissez votre filière</h2>
               </div>
               <p className="text-sm text-slate-500 dark:text-neutral-100 mb-4">
                 Sélectionnez la filière que vous voulez apprendre. Elle apparaîtra dans votre tableau de bord.
@@ -460,7 +460,7 @@ export default function SignupPage() {
                           <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-secondary-600 dark:text-white">{path.title}</div>
+                          <div className="font-medium text-sm text-secondary-600 dark:text-white">{path.title}</div>
                           <div className="text-xs text-slate-500 dark:text-neutral-100">{path.category} • {path.duration_weeks} {t('career.weeks')}</div>
                         </div>
                         {selected && <CheckCircle className="w-5 h-5 text-primary-500 flex-shrink-0" />}
@@ -490,7 +490,7 @@ export default function SignupPage() {
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-5 h-5 text-primary-500" />
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('onboarding.location')}</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('onboarding.location')}</h2>
               </div>
               <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">{t('onboarding.location.subtitle')}</p>
 
@@ -593,7 +593,7 @@ export default function SignupPage() {
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-5 h-5 text-primary-500" />
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('onboarding.location')}</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('onboarding.location')}</h2>
               </div>
               <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">{t('onboarding.location.subtitle')}</p>
 
@@ -696,7 +696,7 @@ export default function SignupPage() {
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <ShieldCheck className="w-5 h-5 text-primary-500" />
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('kyc.title')}</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('kyc.title')}</h2>
               </div>
               <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">{t('kyc.subtitle')}</p>
 
@@ -756,7 +756,7 @@ export default function SignupPage() {
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <ShieldCheck className="w-5 h-5 text-primary-500" />
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('kyc.title')}</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('kyc.title')}</h2>
               </div>
               <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">{t('kyc.subtitle')}</p>
 
@@ -797,7 +797,7 @@ export default function SignupPage() {
           {/* Step 6: Annual Plan (students only) */}
           {step === 6 && selectedRole === 'student' && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-xl font-bold text-secondary-600 dark:text-white mb-4">{t('onboarding.step3')}</h2>
+              <h2 className="text-xl font-medium text-secondary-600 dark:text-white mb-4">{t('onboarding.step3')}</h2>
               <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">{t('pricing.subtitle')}</p>
               <div className="space-y-3">
                 {ANNUAL_PLANS.map((plan) => (
@@ -813,7 +813,7 @@ export default function SignupPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-semibold text-secondary-600 dark:text-white">{t(plan.nameKey)}</div>
+                        <div className="font-medium text-secondary-600 dark:text-white">{t(plan.nameKey)}</div>
                         <div className="text-sm text-secondary-400 dark:text-neutral-100">${plan.price} {t('pricing.month')}</div>
                       </div>
                       {selectedPlan === plan.id && <CheckCircle className="w-6 h-6 text-primary-500" />}
@@ -838,7 +838,7 @@ export default function SignupPage() {
               <div className="w-16 h-16 mx-auto rounded-2xl bg-success-100 dark:bg-success-600/20 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-success-500" />
               </div>
-              <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('onboarding.trial')}</h2>
+              <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('onboarding.trial')}</h2>
               <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('pricing.subtitle')}</p>
 
               <div className="flex gap-3">

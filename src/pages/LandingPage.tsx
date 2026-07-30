@@ -139,7 +139,7 @@ export default function LandingPage() {
             Nouveau: Parcours Professionnels
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-secondary-600 dark:text-white leading-tight max-w-4xl mx-auto animate-fade-in-up">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-secondary-600 dark:text-white leading-tight max-w-4xl mx-auto animate-fade-in-up">
             {t('hero.title')}
           </h1>
 
@@ -211,7 +211,7 @@ export default function LandingPage() {
                   <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-primary-500" />
                   </div>
-                  <div className="text-3xl lg:text-4xl font-bold text-secondary-600 dark:text-white mb-1">
+                  <div className="text-3xl lg:text-4xl font-medium text-secondary-600 dark:text-white mb-1">
                     {stat.value}
                   </div>
                   <div className="text-sm text-slate-500 dark:text-neutral-400">{t(stat.labelKey)}</div>
@@ -226,7 +226,7 @@ export default function LandingPage() {
       <section className="py-20 bg-sage-50 dark:bg-secondary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-600 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-secondary-600 dark:text-white mb-4">
               {t('section.featured')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-300 max-w-2xl mx-auto">
@@ -279,12 +279,12 @@ export default function LandingPage() {
                           <CatIcon className="w-16 h-16 text-slate-400 dark:text-neutral-500" />
                         </div>
                       )}
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 dark:bg-secondary-800/90 text-xs font-semibold text-secondary-600 dark:text-white">
+                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 dark:bg-secondary-800/90 text-xs font-medium text-secondary-600 dark:text-white">
                         {path.category}
                       </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="font-heading font-semibold text-lg text-secondary-600 dark:text-white mb-2 line-clamp-2">
+                      <h3 className="font-heading font-medium text-lg text-secondary-600 dark:text-white mb-2 line-clamp-2">
                         {path.title}
                       </h3>
                       <p className="text-sm text-slate-500 dark:text-neutral-400 mb-4 line-clamp-2">
@@ -339,7 +339,7 @@ export default function LandingPage() {
       <section className="py-20 bg-white dark:bg-secondary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-600 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-secondary-600 dark:text-white mb-4">
               {t('section.categories')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-300 max-w-2xl mx-auto">
@@ -358,7 +358,7 @@ export default function LandingPage() {
                   <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center group-hover:bg-primary-500 transition-colors">
                     <Icon className="w-7 h-7 text-primary-500 group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="font-semibold text-secondary-600 dark:text-white mb-1">
+                  <h3 className="font-medium text-secondary-600 dark:text-white mb-1">
                     {t(cat.key)}
                   </h3>
                   <p className="text-sm text-slate-500 dark:text-neutral-400">
@@ -375,7 +375,7 @@ export default function LandingPage() {
       <section className="py-20 bg-sage-50 dark:bg-secondary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-600 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-secondary-600 dark:text-white mb-4">
               {t('section.process')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-300 max-w-2xl mx-auto">
@@ -391,13 +391,13 @@ export default function LandingPage() {
                 const Icon = step.icon;
                 return (
                   <div key={i} className="text-center">
-                    <div className="relative w-12 h-12 mx-auto mb-4 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold z-10 ring-4 ring-sage-50 dark:ring-secondary-700">
+                    <div className="relative w-12 h-12 mx-auto mb-4 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium z-10 ring-4 ring-sage-50 dark:ring-secondary-700">
                       {i + 1}
                     </div>
                     <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white dark:bg-secondary-800 flex items-center justify-center shadow-sm">
                       <Icon className="w-7 h-7 text-primary-500" />
                     </div>
-                    <h3 className="font-semibold text-secondary-600 dark:text-white mb-2">
+                    <h3 className="font-medium text-secondary-600 dark:text-white mb-2">
                       {t(step.titleKey)}
                     </h3>
                     <p className="text-sm text-slate-500 dark:text-neutral-400">
@@ -416,7 +416,7 @@ export default function LandingPage() {
               return (
                 <div key={i} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium flex-shrink-0">
                       {i + 1}
                     </div>
                     {i < PROCESS_STEPS.length - 1 && (
@@ -426,7 +426,7 @@ export default function LandingPage() {
                   <div className="pb-2">
                     <div className="flex items-center gap-2 mb-1">
                       <Icon className="w-5 h-5 text-primary-500" />
-                      <h3 className="font-semibold text-secondary-600 dark:text-white">
+                      <h3 className="font-medium text-secondary-600 dark:text-white">
                         {t(step.titleKey)}
                       </h3>
                     </div>
@@ -445,7 +445,7 @@ export default function LandingPage() {
       <section className="py-20 bg-white dark:bg-secondary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-600 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-secondary-600 dark:text-white mb-4">
               {t('section.instructors')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-300 max-w-2xl mx-auto">
@@ -455,10 +455,10 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {INSTRUCTORS.map((instr, i) => (
               <div key={i} className="card p-6 text-center hover:scale-105 hover:shadow-lg transition-all duration-300">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-medium">
                   {instr.avatar}
                 </div>
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1">
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1">
                   {instr.name}
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-neutral-400 mb-3">{instr.title}</p>
@@ -482,7 +482,7 @@ export default function LandingPage() {
       <section className="py-20 bg-sage-50 dark:bg-secondary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-600 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-secondary-600 dark:text-white mb-4">
               {t('section.testimonials')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-300 max-w-2xl mx-auto">
@@ -497,11 +497,11 @@ export default function LandingPage() {
                   "{tm.text}"
                 </p>
                 <div className="flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-secondary-600">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-medium">
                     {tm.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold text-secondary-600 dark:text-white">{tm.name}</div>
+                    <div className="font-medium text-secondary-600 dark:text-white">{tm.name}</div>
                     <div className="text-sm text-slate-500 dark:text-neutral-400">{tm.role}</div>
                   </div>
                 </div>
@@ -515,7 +515,7 @@ export default function LandingPage() {
       <section className="py-16 bg-white dark:bg-secondary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-secondary-600 dark:text-white mb-2">
+            <h2 className="text-2xl sm:text-3xl font-medium text-secondary-600 dark:text-white mb-2">
               {t('section.companies')}
             </h2>
             <p className="text-slate-500 dark:text-neutral-400 text-sm">
@@ -526,7 +526,7 @@ export default function LandingPage() {
             {COMPANIES.map((name, i) => (
               <span
                 key={i}
-                className="text-2xl font-bold text-slate-400 dark:text-neutral-500 tracking-tight hover:text-slate-600 dark:hover:text-neutral-300 transition-colors cursor-default"
+                className="text-2xl font-medium text-slate-400 dark:text-neutral-500 tracking-tight hover:text-slate-600 dark:hover:text-neutral-300 transition-colors cursor-default"
               >
                 {name}
               </span>
@@ -539,7 +539,7 @@ export default function LandingPage() {
       <section className="py-20 bg-sage-50 dark:bg-secondary-700">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-600 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-secondary-600 dark:text-white mb-4">
               {t('section.faq')}
             </h2>
           </div>
@@ -555,7 +555,7 @@ export default function LandingPage() {
                     onClick={() => setOpenFaq(isOpen ? null : i)}
                     className="w-full flex items-center justify-between p-5 text-left"
                   >
-                    <span className="font-semibold text-secondary-600 dark:text-white pr-4">
+                    <span className="font-medium text-secondary-600 dark:text-white pr-4">
                       {t(faq.q)}
                     </span>
                     <ChevronDown
@@ -584,7 +584,7 @@ export default function LandingPage() {
       <section className="py-20 bg-primary-500">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <GraduationCap className="w-14 h-14 text-white mx-auto mb-6" />
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-4 tracking-tight">
             Ready to start your career journey?
           </h2>
           <p className="text-primary-100 text-lg mb-8 max-w-2xl mx-auto">
@@ -592,7 +592,7 @@ export default function LandingPage() {
           </p>
           <button
             onClick={handleGetStarted}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-primary-500 font-semibold hover:bg-primary-50 transition-colors shadow-lg group"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-primary-500 font-medium hover:bg-primary-50 transition-colors shadow-lg group"
           >
             {t('hero.cta')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

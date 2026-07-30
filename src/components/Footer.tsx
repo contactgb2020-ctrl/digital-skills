@@ -21,9 +21,9 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                <span className="text-white font-heading font-bold text-lg">D</span>
+                <span className="text-white font-heading font-medium text-lg">D</span>
               </div>
-              <span className="font-heading font-bold text-lg">
+              <span className="font-heading font-medium text-lg">
                 Digital <span className="text-primary-400">Skills</span>
               </span>
             </div>
@@ -36,7 +36,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold mb-4">{t('nav.courses')}</h4>
+            <h4 className="font-heading font-medium mb-4">{t('nav.courses')}</h4>
             <ul className="space-y-2 text-sm text-secondary-200">
               <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/career-paths')}>{t('category.technology')}</li>
               <li className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate('/career-paths')}>{t('category.business')}</li>
@@ -46,7 +46,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold mb-4">{t('footer.links')}</h4>
+            <h4 className="font-heading font-medium mb-4">{t('footer.links')}</h4>
             <ul className="space-y-2 text-sm text-secondary-200">
               {links.map((link, i) => (
                 <li key={i} className="hover:text-primary-400 cursor-pointer transition-colors" onClick={() => navigate(link.route)}>
@@ -57,7 +57,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold mb-4">{t('footer.made_in_africa')}</h4>
+            <h4 className="font-heading font-medium mb-4">{t('footer.made_in_africa')}</h4>
             <p className="text-sm text-secondary-200 mb-2">
               {t('footer.liyah_group')} — {t('footer.tagline')}
             </p>

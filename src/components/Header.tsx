@@ -43,9 +43,9 @@ export default function Header() {
           {/* Logo */}
           <button onClick={() => handleNav('/')} className="flex items-center gap-2 group">
             <div className="w-9 h-9 rounded-[10px] bg-primary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-white font-heading font-extrabold text-lg">D</span>
+              <span className="text-white font-heading font-medium text-lg">D</span>
             </div>
-            <span className="font-heading font-extrabold text-lg text-secondary-600 dark:text-white hidden sm:block tracking-tight">
+            <span className="font-heading font-medium text-lg text-secondary-600 dark:text-white hidden sm:block tracking-tight">
               Digital <span className="text-primary-500">Skills</span>
             </span>
           </button>

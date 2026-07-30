@@ -176,7 +176,7 @@ export default function PricingPage() {
             {t('pricing.one_time')}
           </span>
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-secondary-600 dark:text-white mb-4">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium text-secondary-600 dark:text-white mb-4">
           {t('pricing.title')}
         </h1>
         <p className="text-lg sm:text-xl text-secondary-400 dark:text-neutral-100 max-w-2xl mx-auto">
@@ -215,7 +215,7 @@ export default function PricingPage() {
                 {/* Badge */}
                 {plan.badge && (
                   <div
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                       isHighlighted
                         ? 'bg-primary-500 text-white'
                         : 'bg-secondary-600 text-white dark:bg-primary-500'
@@ -237,7 +237,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Name + desc */}
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white mb-1">
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white mb-1">
                   {t(plan.name)}
                 </h2>
                 <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-5 min-h-[2.5rem]">
@@ -246,7 +246,7 @@ export default function PricingPage() {
 
                 {/* Price */}
                 <div className="mb-1">
-                  <span className="text-4xl font-bold text-secondary-600 dark:text-white">
+                  <span className="text-4xl font-medium text-secondary-600 dark:text-white">
                     ${plan.price}
                   </span>
                   <span className="text-lg font-medium text-secondary-400 dark:text-neutral-100 ml-1">{t('pricing.month')}</span>
@@ -295,7 +295,7 @@ export default function PricingPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-sage-200 dark:border-secondary-500">
-                  <th className="text-left p-5 text-sm font-semibold text-secondary-600 dark:text-white min-w-[200px]">
+                  <th className="text-left p-5 text-sm font-medium text-secondary-600 dark:text-white min-w-[200px]">
                     {t('pricing.title')}
                   </th>
                   {plans.map((plan) => (
@@ -306,10 +306,10 @@ export default function PricingPage() {
                       }`}
                     >
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-sm font-bold text-secondary-600 dark:text-white">
+                        <span className="text-sm font-medium text-secondary-600 dark:text-white">
                           {t(plan.name)}
                         </span>
-                        <span className="text-lg font-bold text-primary-500">
+                        <span className="text-lg font-medium text-primary-500">
                           ${plan.price}<span className="text-xs font-normal text-secondary-400">{t('pricing.month')}</span>
                         </span>
                       </div>
@@ -340,7 +340,7 @@ export default function PricingPage() {
                             <X className="w-5 h-5 text-secondary-300 dark:text-secondary-400 mx-auto" />
                           )
                         ) : (
-                          <span className="text-sm font-bold text-secondary-600 dark:text-white">
+                          <span className="text-sm font-medium text-secondary-600 dark:text-white">
                             {val}
                           </span>
                         )}
@@ -377,7 +377,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <h2 className="text-3xl font-bold text-secondary-600 dark:text-white text-center mb-10">
+        <h2 className="text-3xl font-medium text-secondary-600 dark:text-white text-center mb-10">
           {t('faq.title')}
         </h2>
         <div className="space-y-3">
@@ -393,7 +393,7 @@ export default function PricingPage() {
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
                   className="w-full flex items-center justify-between p-5 text-left"
                 >
-                  <span className="font-semibold text-secondary-600 dark:text-white">
+                  <span className="font-medium text-secondary-600 dark:text-white">
                     {t(qKey)}
                   </span>
                   <span
@@ -419,7 +419,7 @@ export default function PricingPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="card p-10 lg:p-16 text-center bg-gradient-to-br from-primary-500 to-primary-600 border-0">
           <Sparkles className="w-10 h-10 text-white mx-auto mb-4" />
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl sm:text-4xl font-medium text-white mb-4">
             {t('hero.cta')}
           </h2>
           <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
@@ -427,7 +427,7 @@ export default function PricingPage() {
           </p>
           <button
             onClick={handleCta}
-            className="inline-flex items-center gap-2 bg-white text-primary-500 font-semibold px-8 py-3 rounded-lg hover:bg-sage-50 transition-colors"
+            className="inline-flex items-center gap-2 bg-white text-primary-500 font-medium px-8 py-3 rounded-lg hover:bg-sage-50 transition-colors"
           >
             {t('pricing.cta')}
             <ArrowRight className="w-5 h-5" />

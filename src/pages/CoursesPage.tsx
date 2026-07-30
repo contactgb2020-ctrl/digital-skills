@@ -62,7 +62,7 @@ export default function CoursesPage() {
   return (
     <div className="pt-16 min-h-screen bg-neutral-light dark:bg-secondary-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold text-secondary-600 dark:text-white mb-2">{t('section.popular')}</h1>
+        <h1 className="text-3xl font-medium text-secondary-600 dark:text-white mb-2">{t('section.popular')}</h1>
         <p className="text-secondary-400 dark:text-neutral-100 mb-8">{t('section.popular.subtitle')}</p>
 
         {/* Search */}
@@ -126,7 +126,7 @@ export default function CoursesPage() {
                   </div>
                   <div className="p-5">
                     <span className="text-xs font-medium text-primary-500">{course.category}</span>
-                    <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-2 line-clamp-2">{course.title}</h3>
+                    <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-2 line-clamp-2">{course.title}</h3>
                     <div className="flex items-center gap-3 text-xs text-secondary-400 dark:text-neutral-100 mb-2">
                       <span>{t(LEVEL_KEYS[course.level] as TKey) || course.level}</span>
                       {rating && (

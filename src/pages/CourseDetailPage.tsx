@@ -206,7 +206,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             <span className="inline-block px-3 py-1 rounded-full bg-primary-500 text-sm font-medium">{course.category}</span>
-            <h1 className="text-3xl lg:text-4xl font-bold">{course.title}</h1>
+            <h1 className="text-3xl lg:text-4xl font-medium">{course.title}</h1>
             <p className="text-secondary-200 text-lg">{course.description}</p>
             <div className="flex flex-wrap items-center gap-4 text-sm text-secondary-200">
               {avgRating > 0 && (
@@ -257,7 +257,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
           {/* Overview */}
           {activeTab === 'overview' && (
             <div className="card p-6 animate-fade-in">
-              <h2 className="text-xl font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('course.overview')}</h2>
+              <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white mb-3">{t('course.overview')}</h2>
               <p className="text-secondary-400 dark:text-neutral-100 leading-relaxed">{course.description || t('course.no_description')}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
                 <InfoBox icon={<BookOpen className="w-5 h-5" />} label={t('course.lessons')} value={String(totalLessons)} />
@@ -295,7 +295,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                             <span className="text-xs text-secondary-400">#{i + 1}</span>
                             <h3 className="font-medium text-secondary-600 dark:text-white truncate">{lesson.title}</h3>
                             {isEnrolled && !hasFullAccess && isPreviewLesson && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400">Aperçu</span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400">Aperçu</span>
                             )}
                           </div>
                           <div className="flex items-center gap-3 text-xs text-secondary-400 mt-1">
@@ -320,7 +320,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
               {/* Submit review */}
               {isEnrolled && session && (
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('course.rate')}</h3>
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{t('course.rate')}</h3>
                   <div className="flex gap-1 mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button key={star} onClick={() => setReviewRating(star)}>
@@ -343,7 +343,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                 reviews.map((review) => (
                   <div key={review.id} className="card p-5">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-medium text-sm">
                         {(review.user_id as string).charAt(0).toUpperCase()}
                       </div>
                       <div className="flex items-center gap-1">
@@ -369,7 +369,7 @@ export default function CourseDetailPage({ courseId }: { courseId: string }) {
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-secondary-400 dark:text-neutral-100">{t('dashboard.progress')}</span>
-                    <span className="text-primary-500 font-semibold">{progressPct}%</span>
+                    <span className="text-primary-500 font-medium">{progressPct}%</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-secondary-600">
                     <div className="h-full rounded-full bg-primary-500 transition-all duration-500" style={{ width: `${progressPct}%` }} />
@@ -488,7 +488,7 @@ function LessonPlayer({
       <div className="bg-white dark:bg-secondary-700 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-heading font-bold text-secondary-600 dark:text-white">{lesson.title}</h2>
+            <h2 className="text-xl font-heading font-medium text-secondary-600 dark:text-white">{lesson.title}</h2>
             <button onClick={onClose} className="text-secondary-400 hover:text-secondary-600 dark:hover:text-white text-2xl">&times;</button>
           </div>
 
@@ -534,7 +534,7 @@ function LessonPlayer({
 
           {showQuiz && quizzes.map((quiz) => (
             <div key={quiz.id} className="card p-5 mb-4">
-              <h3 className="font-semibold text-secondary-600 dark:text-white mb-3">{quiz.question}</h3>
+              <h3 className="font-medium text-secondary-600 dark:text-white mb-3">{quiz.question}</h3>
               <div className="space-y-2">
                 {(quiz.answers as string[]).map((answer, i) => (
                   <label key={i} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${quizAnswers[quiz.id] === i ? 'bg-primary-50 dark:bg-primary-600/20 border-2 border-primary-500' : 'bg-gray-50 dark:bg-secondary-600 border-2 border-transparent'}`}>
@@ -576,7 +576,7 @@ function InfoBox({ icon, label, value }: { icon: React.ReactNode; label: string;
   return (
     <div className="p-4 rounded-xl bg-gray-50 dark:bg-secondary-600">
       <div className="flex items-center gap-2 text-primary-500 mb-1">{icon}</div>
-      <div className="text-lg font-bold text-secondary-600 dark:text-white">{value}</div>
+      <div className="text-lg font-medium text-secondary-600 dark:text-white">{value}</div>
       <div className="text-xs text-secondary-400 dark:text-neutral-100">{label}</div>
     </div>
   );

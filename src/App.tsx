@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { RouterProvider, useRouter } from './router/Router';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import CursorEffect from './components/CursorEffect';
 import LandingPage from './pages/LandingPage';
 import CoursesPage from './pages/CoursesPage';
 import PricingPage from './pages/PricingPage';
@@ -36,6 +37,7 @@ function AppRoutes() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <CursorEffect />
       <Header />
       <div className="flex-1">{renderPage(path, session, profile?.role)}</div>
       {!isAuthPage && <Footer />}

@@ -22,7 +22,7 @@ export default function TrainerDashboard() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-alert-100 dark:bg-alert-600/20 flex items-center justify-center">
             <XCircle className="w-8 h-8 text-alert-500" />
           </div>
-          <p className="text-secondary-600 dark:text-white font-semibold mb-2">{t('trainer.access_denied')}</p>
+          <p className="text-secondary-600 dark:text-white font-medium mb-2">{t('trainer.access_denied')}</p>
           <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('trainer.access_denied_msg')}</p>
         </div>
       </div>
@@ -321,7 +321,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
       {/* Modern analytics overview */}
       <div className="mb-8">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-secondary-400 dark:text-neutral-100 mb-3 flex items-center gap-2">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-secondary-400 dark:text-neutral-100 mb-3 flex items-center gap-2">
           <BarChart3 className="w-4 h-4" /> {t('trainer.analytics')}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -344,7 +344,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                   <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
                     <BookOpen className="w-10 h-10 text-primary-500" />
                   </div>
-                  <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('dashboard.no_courses')}</p>
+                  <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('dashboard.no_courses')}</p>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">Créez votre premier cours et partagez votre expertise</p>
                   <button onClick={() => { setTab('create'); setShowForm(true); }} className="btn-primary inline-flex items-center gap-2">
                     <Plus className="w-5 h-5" /> {t('trainer.create_course')}
@@ -373,7 +373,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1">{course.title}</h3>
+                          <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1">{course.title}</h3>
                           <p className="text-sm text-secondary-400 dark:text-neutral-100 line-clamp-2 mb-2">{course.description}</p>
                           <div className="flex flex-wrap items-center gap-3 text-xs">
                             <StatusBadge status={course.status} t={t} />
@@ -451,7 +451,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
           {/* Create/Edit form */}
           {tab === 'create' && showForm && (
             <form onSubmit={handleCreate} className="card p-6 max-w-2xl space-y-4 animate-fade-in">
-              <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{editingCourse ? t('trainer.edit_course') : t('trainer.create_course')}</h2>
+              <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{editingCourse ? t('trainer.edit_course') : t('trainer.create_course')}</h2>
               <div>
                 <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.title')}</label>
                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="input-field" />
@@ -500,7 +500,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
           {showLessonForm && (
             <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowLessonForm(false)}>
               <form onSubmit={handleAddLesson} className="bg-white dark:bg-secondary-700 rounded-2xl max-w-lg w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('trainer.add_lesson')}</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('trainer.add_lesson')}</h2>
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.add_lesson_title')}</label>
                   <input type="text" required value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} className="input-field" />
@@ -537,7 +537,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
           {showQuizForm && (
             <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowQuizForm(false)}>
               <form onSubmit={handleAddQuiz} className="bg-white dark:bg-secondary-700 rounded-2xl max-w-lg w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white">{t('trainer.add_quiz')}</h2>
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white">{t('trainer.add_quiz')}</h2>
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('trainer.question')}</label>
                   <input type="text" required value={quizForm.question} onChange={(e) => setQuizForm({ ...quizForm, question: e.target.value })} className="input-field" />
@@ -579,7 +579,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               <div className="card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100">Solde disponible pour retrait</p>
-                  <p className="text-2xl font-bold text-secondary-600 dark:text-white">${availableBalance.toFixed(2)}</p>
+                  <p className="text-2xl font-medium text-secondary-600 dark:text-white">${availableBalance.toFixed(2)}</p>
                 </div>
                 <button
                   onClick={() => { setShowPayoutModal(true); setPayoutSubmitted(false); setPayoutAmount(''); setPayoutDetails(''); }}
@@ -592,7 +592,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
 
               {payoutRequests.length > 0 && (
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">Mes demandes de retrait</h3>
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">Mes demandes de retrait</h3>
                   <div className="space-y-2">
                     {payoutRequests.map((p) => (
                       <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
@@ -610,7 +610,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               )}
 
               <div className="card p-6">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.earnings_history')}</h3>
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{t('trainer.earnings_history')}</h3>
                 {earnings.length === 0 ? (
                   <div className="text-center py-8">
                     <Wallet className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
@@ -625,7 +625,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                           <span className="text-xs text-secondary-400 dark:text-neutral-100 ml-2">{e.total_watch_hours}h</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-semibold text-primary-500">${Number(e.amount_due).toFixed(2)}</span>
+                          <span className="text-sm font-medium text-primary-500">${Number(e.amount_due).toFixed(2)}</span>
                           <span className={`px-2 py-0.5 rounded-full text-xs ${e.status === 'paid' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400'}`}>
                             {e.status}
                           </span>
@@ -655,7 +655,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               </div>
 
               <div className="card p-6">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.my_courses')}</h3>
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{t('trainer.my_courses')}</h3>
                 <div className="space-y-3">
                   {courses.map((course) => {
                     const enrollCount = courseEnrollments[course.id] || 0;
@@ -683,7 +683,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center">
                 <MessageSquare className="w-10 h-10 text-primary-500" />
               </div>
-              <p className="text-secondary-600 dark:text-white font-semibold mb-1">{t('trainer.messages')}</p>
+              <p className="text-secondary-600 dark:text-white font-medium mb-1">{t('trainer.messages')}</p>
               <p className="text-sm text-secondary-400 dark:text-neutral-100">No messages</p>
             </div>
           )}
@@ -692,7 +692,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
           {tab === 'announcements' && (
             <div className="space-y-6">
               <form onSubmit={handlePostAnnouncement} className="card p-6 max-w-2xl space-y-4 animate-fade-in">
-                <h2 className="text-xl font-bold text-secondary-600 dark:text-white flex items-center gap-2">
+                <h2 className="text-xl font-medium text-secondary-600 dark:text-white flex items-center gap-2">
                   <Megaphone className="w-5 h-5" /> {t('trainer.announcements')}
                 </h2>
                 <div>
@@ -709,7 +709,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
               </form>
 
               <div className="card p-6">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('trainer.announcements')}</h3>
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{t('trainer.announcements')}</h3>
                 {announcements.length === 0 ? (
                   <div className="text-center py-8">
                     <Megaphone className="w-12 h-12 text-secondary-400 mx-auto mb-3" />
@@ -738,7 +738,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setShowPayoutModal(false)}>
           <div className="card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-secondary-600 dark:text-white">Demander un retrait</h3>
+              <h3 className="text-lg font-medium text-secondary-600 dark:text-white">Demander un retrait</h3>
               <button onClick={() => setShowPayoutModal(false)} className="text-secondary-400 hover:text-secondary-600 dark:hover:text-white">
                 <X className="w-5 h-5" />
               </button>
@@ -749,7 +749,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
                 <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-success-100 dark:bg-success-600/20 flex items-center justify-center">
                   <CheckCircle className="w-7 h-7 text-success-500" />
                 </div>
-                <p className="font-semibold text-secondary-600 dark:text-white mb-1">Demande envoyée</p>
+                <p className="font-medium text-secondary-600 dark:text-white mb-1">Demande envoyée</p>
                 <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
                   Notre équipe traite votre demande manuellement et vous contactera pour le versement.
                 </p>
@@ -758,7 +758,7 @@ function TrainerContent({ profile, session, t }: { profile: NonNullable<ReturnTy
             ) : (
               <form onSubmit={handleRequestPayout} className="space-y-4">
                 <p className="text-sm text-secondary-400 dark:text-neutral-100">
-                  Solde disponible : <span className="font-semibold text-secondary-600 dark:text-white">${availableBalance.toFixed(2)}</span>
+                  Solde disponible : <span className="font-medium text-secondary-600 dark:text-white">${availableBalance.toFixed(2)}</span>
                 </p>
 
                 <div>
@@ -846,7 +846,7 @@ function QuickStat({ icon, label, value, color }: { icon: React.ReactNode; label
     <div className="card p-4 flex items-center gap-3">
       <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center ${c.text} flex-shrink-0`}>{icon}</div>
       <div className="min-w-0">
-        <div className="text-lg font-bold text-secondary-600 dark:text-white truncate">{value}</div>
+        <div className="text-lg font-medium text-secondary-600 dark:text-white truncate">{value}</div>
         <div className="text-xs text-secondary-400 dark:text-neutral-100 truncate">{label}</div>
       </div>
     </div>
@@ -858,7 +858,7 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
   return (
     <div className="card p-6">
       <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center ${c.text} mb-3`}>{icon}</div>
-      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{value}</div>
+      <div className="text-2xl font-medium text-secondary-600 dark:text-white">{value}</div>
       <div className="text-sm text-secondary-400 dark:text-neutral-100">{label}</div>
     </div>
   );

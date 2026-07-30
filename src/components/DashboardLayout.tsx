@@ -47,11 +47,11 @@ export default function DashboardLayout({ children, title, items, currentRoute, 
       {/* User info card */}
       <div className="p-4 border-b border-sage-200 dark:border-secondary-500">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
             {profile?.nom?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase() || '?'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-secondary-600 dark:text-white truncate">{profile?.nom || profile?.email}</p>
+            <p className="text-sm font-medium text-secondary-600 dark:text-white truncate">{profile?.nom || profile?.email}</p>
             <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${roleStyle.bg} ${roleStyle.text}`}>
               {roleStyle.label}
             </span>
@@ -63,7 +63,7 @@ export default function DashboardLayout({ children, title, items, currentRoute, 
         {/* Dashboard switcher */}
         {accessibleDashboards.length > 1 && (
           <>
-            <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
               {t('nav.dashboard')}
             </div>
             {accessibleDashboards.map((dash) => (
@@ -85,7 +85,7 @@ export default function DashboardLayout({ children, title, items, currentRoute, 
         )}
 
         {/* Dashboard-specific items */}
-        <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
           {title}
         </div>
         {items.map((item, i) => (
@@ -136,7 +136,7 @@ export default function DashboardLayout({ children, title, items, currentRoute, 
         <div className="md:hidden fixed inset-0 z-50 bg-black/60" onClick={() => setMobileOpen(false)}>
           <aside className="flex flex-col w-72 bg-white dark:bg-secondary-800 border-r border-sage-200 dark:border-secondary-500 h-full animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-sage-200 dark:border-secondary-500">
-              <span className="font-heading font-bold text-lg text-secondary-600 dark:text-white">Menu</span>
+              <span className="font-heading font-medium text-lg text-secondary-600 dark:text-white">Menu</span>
               <button onClick={() => setMobileOpen(false)} className="p-1 rounded-[10px] hover:bg-sage-100 dark:hover:bg-secondary-600">
                 <X className="w-5 h-5 text-slate-500" />
               </button>
@@ -153,12 +153,12 @@ export default function DashboardLayout({ children, title, items, currentRoute, 
           <button onClick={() => setMobileOpen(true)} className="p-2 rounded-[10px] hover:bg-sage-100 dark:hover:bg-secondary-600">
             <Menu className="w-5 h-5 text-secondary-600 dark:text-white" />
           </button>
-          <h1 className="text-base font-semibold text-secondary-600 dark:text-white truncate">{title}</h1>
+          <h1 className="text-base font-medium text-secondary-600 dark:text-white truncate">{title}</h1>
           <div className="w-9"></div>
         </div>
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8">
-          <h1 className="hidden md:block text-2xl font-extrabold text-secondary-600 dark:text-white mb-6 tracking-tight">{title}</h1>
+          <h1 className="hidden md:block text-2xl font-medium text-secondary-600 dark:text-white mb-6 tracking-tight">{title}</h1>
           {children}
         </div>
       </main>

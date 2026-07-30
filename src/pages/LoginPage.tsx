@@ -39,7 +39,7 @@ export default function LoginPage() {
             <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
               <Lock className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-secondary-600 dark:text-white">{t('auth.login.title')}</h1>
+            <h1 className="text-2xl font-medium text-secondary-600 dark:text-white">{t('auth.login.title')}</h1>
             <p className="text-secondary-400 dark:text-neutral-100 mt-2">{t('auth.login.subtitle')}</p>
           </div>
 
@@ -99,7 +99,7 @@ export default function LoginPage() {
 
           <p className="text-center mt-6 text-sm text-secondary-400 dark:text-neutral-100">
             {t('auth.no_account')}{' '}
-            <button onClick={() => navigate('/signup')} className="text-primary-500 font-semibold hover:underline">
+            <button onClick={() => navigate('/signup')} className="text-primary-500 font-medium hover:underline">
               {t('auth.signup.button')}
             </button>
           </p>

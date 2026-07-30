@@ -32,7 +32,7 @@ export default function AdminDashboard() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-alert-100 dark:bg-alert-600/20 flex items-center justify-center">
             <Shield className="w-8 h-8 text-alert-500" />
           </div>
-          <p className="text-secondary-600 dark:text-white font-semibold mb-2">{t('admin.no_access')}</p>
+          <p className="text-secondary-600 dark:text-white font-medium mb-2">{t('admin.no_access')}</p>
         </div>
       </div>
     );
@@ -478,7 +478,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
               <div className="grid lg:grid-cols-2 gap-6">
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-primary-500" /> {t('admin.pending_reviews')}
                   </h3>
                   {pendingCourses.length === 0 ? (
@@ -499,7 +499,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 </div>
 
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                     <FileCheck className="w-5 h-5 text-primary-500" /> {t('admin.kyc_pending')}
                   </h3>
                   {kycDocs.filter((d) => d.status === 'pending').length === 0 ? (
@@ -510,7 +510,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 </div>
 
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('admin.plan_distribution')}</h3>
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{t('admin.plan_distribution')}</h3>
                   <div className="space-y-3">
                     {(['starter', 'professional', 'expert', 'bundle'] as const).map((plan) => {
                       const count = planCounts[plan] || 0;
@@ -531,11 +531,11 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 </div>
 
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{t('admin.role_distribution')}</h3>
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{t('admin.role_distribution')}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {(['student', 'trainer', 'super_admin'] as const).map((role) => (
                       <div key={role} className="text-center p-4 rounded-xl bg-gray-50 dark:bg-secondary-600">
-                        <div className="text-2xl font-bold text-secondary-600 dark:text-white">{roleCounts[role] || 0}</div>
+                        <div className="text-2xl font-medium text-secondary-600 dark:text-white">{roleCounts[role] || 0}</div>
                         <div className="text-xs text-secondary-400 dark:text-neutral-100 capitalize">{role.replace('_', ' ')}</div>
                       </div>
                     ))}
@@ -612,7 +612,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {tab === 'courses' && (
             <div className="space-y-6">
               <div>
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-3 flex items-center gap-2">
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-3 flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-primary-500" /> {t('admin.pending_reviews')}
                 </h3>
                 {pendingCourses.length === 0 ? (
@@ -622,7 +622,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                     {pendingCourses.map((course) => (
                       <div key={course.id} className="card p-5 flex items-center justify-between">
                         <div>
-                          <h4 className="font-semibold text-secondary-600 dark:text-white">{course.title}</h4>
+                          <h4 className="font-medium text-secondary-600 dark:text-white">{course.title}</h4>
                           <p className="text-sm text-secondary-400 dark:text-neutral-100">{course.category} — {course.level} — {instructorNames[course.created_by] || t('admin.unknown')}</p>
                         </div>
                         <div className="flex gap-2">
@@ -636,7 +636,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
               </div>
 
               <div>
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('admin.all_courses')}</h3>
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-3">{t('admin.all_courses')}</h3>
                 <div className="card overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
@@ -696,7 +696,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-secondary-600 dark:text-white">{kycUserNames[doc.user_id] || t('admin.user_default')}</h4>
+                            <h4 className="font-medium text-secondary-600 dark:text-white">{kycUserNames[doc.user_id] || t('admin.user_default')}</h4>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${doc.status === 'approved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : doc.status === 'pending' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : 'bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400'}`}>
                               {doc.status}
                             </span>
@@ -782,8 +782,8 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('admin.earnings_pending')}</h3>
-                  <div className="text-2xl font-bold text-primary-500 mb-3">
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-3">{t('admin.earnings_pending')}</h3>
+                  <div className="text-2xl font-medium text-primary-500 mb-3">
                     ${pendingEarnings.reduce((s, e) => s + Number(e.amount_due), 0).toFixed(2)}
                   </div>
                   <div className="space-y-2">
@@ -794,7 +794,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                           <span className="text-xs text-secondary-400 dark:text-neutral-100 ml-2">{e.total_watch_hours}h</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-primary-500">${Number(e.amount_due).toFixed(2)}</span>
+                          <span className="text-sm font-medium text-primary-500">${Number(e.amount_due).toFixed(2)}</span>
                           <button onClick={() => markEarningPaid(e.id)} className="text-xs text-success-500 hover:underline">{t('admin.mark_paid')}</button>
                         </div>
                       </div>
@@ -803,15 +803,15 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 </div>
 
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-3">{t('admin.earnings_paid')}</h3>
-                  <div className="text-2xl font-bold text-success-500 mb-3">
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-3">{t('admin.earnings_paid')}</h3>
+                  <div className="text-2xl font-medium text-success-500 mb-3">
                     ${paidEarnings.reduce((s, e) => s + Number(e.amount_due), 0).toFixed(2)}
                   </div>
                   <div className="space-y-2">
                     {paidEarnings.map((e) => (
                       <div key={e.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
                         <span className="text-sm text-secondary-600 dark:text-white">{trainerNames[e.trainer_id] || '—'}</span>
-                        <span className="text-sm font-semibold text-success-500">${Number(e.amount_due).toFixed(2)}</span>
+                        <span className="text-sm font-medium text-success-500">${Number(e.amount_due).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -824,7 +824,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {tab === 'roles' && (
             <div className="space-y-6">
               <div className="card p-6">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary-500" /> Emails autorisés — Super Admin
                 </h3>
                 <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
@@ -846,7 +846,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                     <div key={e.email} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-secondary-600">
                       <span className="text-sm text-secondary-600 dark:text-white">{e.email}</span>
                       {e.protected ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400">Protégé</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-alert-100 dark:bg-alert-600/20 text-alert-600 dark:text-alert-400">Protégé</span>
                       ) : (
                         <button onClick={() => removeSuperAdminEmail(e.email, e.protected)} className="text-xs text-alert-500 hover:underline flex items-center gap-1">
                           <Trash2 className="w-3 h-3" /> Retirer
@@ -874,7 +874,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                 ) : (
                   customRoles.map((role) => (
                     <div key={role.id} className="card p-6">
-                      <h4 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4">{role.name}</h4>
+                      <h4 className="font-heading font-medium text-secondary-600 dark:text-white mb-4">{role.name}</h4>
                       <div className="flex flex-wrap gap-2 mb-4">
                         {PERMISSION_KEYS.map((perm) => {
                           const existing = (rolePerms[role.id] || []).find((p) => p.permission_key === perm);
@@ -892,7 +892,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
               </div>
 
               <form onSubmit={assignStaffRole} className="card p-6 max-w-lg space-y-4">
-                <h4 className="font-heading font-semibold text-secondary-600 dark:text-white">{t('admin.assign_role')}</h4>
+                <h4 className="font-heading font-medium text-secondary-600 dark:text-white">{t('admin.assign_role')}</h4>
                 <div>
                   <label className="block text-sm font-medium text-secondary-600 dark:text-neutral-100 mb-1">{t('admin.select_user')}</label>
                   <select value={assignRole.userId} onChange={(e) => setAssignRole({ ...assignRole, userId: e.target.value })} className="input-field">
@@ -915,7 +915,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {/* LOCATIONS */}
           {tab === 'locations' && (
             <div className="space-y-4">
-              <h3 className="font-heading font-semibold text-secondary-600 dark:text-white">{t('admin.pending_locations')}</h3>
+              <h3 className="font-heading font-medium text-secondary-600 dark:text-white">{t('admin.pending_locations')}</h3>
               {suggestions.length === 0 ? (
                 <p className="text-sm text-secondary-400 dark:text-neutral-100">{t('admin.no_pending')}</p>
               ) : (
@@ -941,7 +941,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {(['starter', 'professional', 'expert', 'bundle'] as const).map((plan) => (
                   <div key={plan} className="card p-6 text-center">
-                    <div className="text-3xl font-bold text-primary-500 mb-1">{planCounts[plan] || 0}</div>
+                    <div className="text-3xl font-medium text-primary-500 mb-1">{planCounts[plan] || 0}</div>
                     <div className="text-sm text-secondary-400 dark:text-neutral-100 capitalize">{plan}</div>
                   </div>
                 ))}
@@ -991,7 +991,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
               {payments.some((p) => p.status === 'pending') && (
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-primary-500" /> Paiements manuels en attente
                   </h3>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
@@ -1011,7 +1011,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                       <tbody>
                         {payments.filter((p) => p.status === 'pending').map((p) => (
                           <tr key={p.id} className="border-b border-slate-100 dark:border-secondary-500">
-                            <td className="p-3 text-sm font-semibold text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
+                            <td className="p-3 text-sm font-medium text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
                             <td className="p-3 text-sm text-secondary-600 dark:text-neutral-100">{p.reference || '—'}</td>
                             <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{p.note || '—'}</td>
                             <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{new Date(p.created_at).toLocaleDateString()}</td>
@@ -1030,7 +1030,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
 
               {payoutRequests.some((p) => p.status === 'pending') && (
                 <div className="card p-6">
-                  <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
+                  <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-1 flex items-center gap-2">
                     <Wallet className="w-5 h-5 text-primary-500" /> Demandes de retrait formateurs
                   </h3>
                   <p className="text-sm text-secondary-400 dark:text-neutral-100 mb-4">
@@ -1050,7 +1050,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                       <tbody>
                         {payoutRequests.filter((p) => p.status === 'pending').map((p) => (
                           <tr key={p.id} className="border-b border-slate-100 dark:border-secondary-500">
-                            <td className="p-3 text-sm font-semibold text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
+                            <td className="p-3 text-sm font-medium text-secondary-600 dark:text-white">${Number(p.amount).toFixed(2)}</td>
                             <td className="p-3 text-sm text-secondary-600 dark:text-neutral-100">{p.method === 'mobile_money' ? 'Mobile Money' : 'Virement bancaire'}</td>
                             <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100 max-w-xs whitespace-pre-wrap">{p.account_details}</td>
                             <td className="p-3 text-sm text-secondary-400 dark:text-neutral-100">{new Date(p.created_at).toLocaleDateString()}</td>
@@ -1073,7 +1073,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
               )}
 
               <div className="card p-6">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                   <PieChart className="w-5 h-5 text-primary-500" /> Subscription Revenue Breakdown
                 </h3>
                 <div className="space-y-3">
@@ -1142,7 +1142,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                   {employers.map((emp) => (
                     <div key={emp.id} className="card p-5">
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-secondary-600 dark:text-white">{emp.company_name || '—'}</h4>
+                        <h4 className="font-medium text-secondary-600 dark:text-white">{emp.company_name || '—'}</h4>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${emp.is_verified ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
                           {emp.is_verified ? 'Verified' : 'Unverified'}
                         </span>
@@ -1224,7 +1224,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {tab === 'reports' && (
             <div className="space-y-6">
               <div className="card p-6">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                   <Download className="w-5 h-5 text-primary-500" /> Export Data
                 </h3>
                 <div className="flex flex-wrap gap-3">
@@ -1268,7 +1268,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-semibold text-secondary-600 dark:text-white">{ticket.subject}</h4>
+                            <h4 className="font-medium text-secondary-600 dark:text-white">{ticket.subject}</h4>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ticket.status === 'open' ? 'bg-primary-100 dark:bg-primary-600/20 text-primary-600 dark:text-primary-400' : ticket.status === 'resolved' ? 'bg-success-100 dark:bg-success-600/20 text-success-600 dark:text-success-400' : 'bg-gray-100 dark:bg-secondary-600 text-secondary-400 dark:text-neutral-100'}`}>
                               {ticket.status}
                             </span>
@@ -1291,7 +1291,7 @@ function AdminContent({ profile, t }: { profile: Profile; t: (k: TKey) => string
           {tab === 'settings' && (
             <div className="space-y-6">
               <div className="card p-6 max-w-lg">
-                <h3 className="font-heading font-semibold text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
+                <h3 className="font-heading font-medium text-secondary-600 dark:text-white mb-4 flex items-center gap-2">
                   <Settings className="w-5 h-5 text-primary-500" /> Platform Settings
                 </h3>
                 <form onSubmit={(e) => { e.preventDefault(); alert('Settings saved (demo)'); }} className="space-y-4">
@@ -1325,7 +1325,7 @@ function StatCard({ icon, label, value, prefix }: { icon: React.ReactNode; label
   return (
     <div className="card p-6">
       <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-600/20 flex items-center justify-center text-primary-500 mb-3">{icon}</div>
-      <div className="text-2xl font-bold text-secondary-600 dark:text-white">{prefix}{value.toLocaleString()}</div>
+      <div className="text-2xl font-medium text-secondary-600 dark:text-white">{prefix}{value.toLocaleString()}</div>
       <div className="text-sm text-secondary-400 dark:text-neutral-100">{label}</div>
     </div>
   );
